@@ -18,11 +18,9 @@ public with sharing class ProductInfoController {
         rows = new List<ProductRow>{ new ProductRow(1) };
         aeRows = new List<AERow>{ new AERow(1) };
         
-        // Map from Case if ID is present
         String caseId = ApexPages.currentPage().getParameters().get('caseId');
         if (String.isNotBlank(caseId)) {
             try {
-                // Fetching Product_Indication__c from Case as requested
                 String query = 'SELECT Product_Indication__c FROM Case WHERE Id = :caseId LIMIT 1';
                 List<SObject> caseRecords = Database.query(query);
                 if (!caseRecords.isEmpty() && caseRecords[0].get('Product_Indication__c') != null) {
@@ -39,11 +37,11 @@ public with sharing class ProductInfoController {
                 Integer index = Integer.valueOf(rowIdxStr);
                 ProductRow currentRow = rows[index - 1];
                 if (String.isNotBlank(currentRow.productName)) {
-                    List<MICC_Product__c> master = [SELECT Id, Name, Product_Type__c, Product_Indication_Medicus__c FROM MICC_Product__c WHERE Name = :currentRow.productName LIMIT 1];
+                    List<MICC_Product__c> master = [SELECT Id, Name, Product_Type__c FROM MICC_Product__c WHERE Name = :currentRow.productName LIMIT 1];
                     if (!master.isEmpty()) {
                         currentRow.productObj.MICC_Product_Link__c = master[0].Id;
                         currentRow.productType = master[0].Product_Type__c;
-                        currentRow.indication = master[0].Product_Indication_Medicus__c;
+                        // Indication is NOT fetched from MICC as per request
                     }
                 }
             }
@@ -128,7 +126,6 @@ public with sharing class ProductInfoController {
             mainAE.Relevant_Medical_History__c = relevantMedicalHistory;
 
             if(!rows.isEmpty()) {
-                // Mirror first row to parent for convenience
                 ProductRow r = rows[0];
                 mainAE.Product_Name__c = r.productName;
                 mainAE.Product_Type__c = r.productType;
@@ -146,47 +143,16 @@ public with sharing class ProductInfoController {
                 mainAE.Technical_Complaint_Number__c = r.technicalComplaintNumber;
                 mainAE.MICC_Product_Link__c = r.productObj.MICC_Product_Link__c;
             }
+            
+            if(!aeRows.isEmpty()) {
+                AERow ae = aeRows[0];
+                mainAE.AE_Event_Name__c = ae.eventName;
+                mainAE.AE_Start_Date__c = ae.startDate;
+                mainAE.AE_End_Date__c = ae.endDate;
+                mainAE.Outcome__c = ae.outcome;
+            }
+
             insert mainAE;
-            
-            // Save Multiple Products
-            List<AE_Product__c> productRecords = new List<AE_Product__c>();
-            for(ProductRow pr : rows) {
-                if(String.isNotBlank(pr.productName) || pr.productObj.MICC_Product_Link__c != null) {
-                    AE_Product__c childProd = new AE_Product__c();
-                    childProd.New_Potential_Adverse_Event__c = mainAE.Id;
-                    childProd.Name = String.isNotBlank(pr.productName) ? pr.productName : 'Product';
-                    childProd.Dose__c = pr.dose;
-                    childProd.Frequency__c = pr.frequency;
-                    childProd.Route_of_administering__c = pr.route;
-                    childProd.Lot_Number__c = pr.lotNumber;
-                    childProd.Expiry_Date__c = pr.expiryDate;
-                    childProd.Therapy_Start_Date__c = pr.therapyStartDate;
-                    childProd.Therapy_End_Date__c = pr.therapyEndDate;
-                    childProd.Product_pickup_availability_status_is__c = pr.pickupStatus;
-                    childProd.Is_this_a_technical_complaint__c = pr.technicalComplaint;
-                    childProd.Technical_complaint__c = pr.technicalComplaintDescription;
-                    productRecords.add(childProd);
-                }
-            }
-            if(!productRecords.isEmpty()) insert productRecords;
-            
-            // Save Individual Adverse Events
-            if (addIndividualEventsFlag && !aeRows.isEmpty()) {
-                List<AE_Individual_Event__c> childEvents = new List<AE_Individual_Event__c>();
-                for (AERow ae : aeRows) {
-                    if (String.isNotBlank(ae.eventName)) {
-                        AE_Individual_Event__c child = new AE_Individual_Event__c();
-                        child.New_Potential_Adverse_Event__c = mainAE.Id;
-                        child.Name = ae.eventName;
-                        child.AE_Start_Date__c = ae.startDate;
-                        child.AE_End_Date__c = ae.endDate;
-                        child.Outcome__c = ae.outcome;
-                        childEvents.add(child);
-                    }
-                }
-                if (!childEvents.isEmpty()) insert childEvents;
-            }
-            
             return new PageReference('/' + mainAE.Id);
         } catch (Exception e) { ApexPages.addMessages(e); return null; }
     }
