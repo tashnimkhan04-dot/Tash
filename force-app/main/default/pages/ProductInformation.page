@@ -1,0 +1,209 @@
+<apex:page controller="ProductInfoController" showHeader="false" sidebar="false" standardStylesheets="false" docType="html-5.0">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; font-size: 11px; }
+        .sourceWrap { border: 1px solid #d58f82; background: #f3f3f3; padding: 0; margin: 10px; margin-bottom: 20px; }
+        .sourceHeader { background: #b7aca4; color: #ffffff; font-weight: bold; font-size: 12px; padding: 4px 6px; border-bottom: 1px solid #d58f82; }
+        .sourceInner { padding: 8px 12px 10px 12px; }
+        .productTable { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        .productTable th { background-color: #a39c92; color: white; border: 1px solid #ffffff; padding: 8px 4px; text-align: center; vertical-align: middle; font-weight: normal; font-size: 10px; }
+        .productTable td { border: 1px solid #ffffff; padding: 4px; background-color: #f0f0f0; text-align: center; vertical-align: middle; font-size: 11px; color: #444; }
+        .unifiedTextBox { width: 100% !important; height: 20px !important; border: 1px solid #999999 !important; background: #ffffff !important; font-size: 12px !important; padding: 2px 6px !important; box-sizing: border-box !important; }
+        .picklistBox select { width: 100%; height: 18px; border: 1px solid #999999; background: #f2f2f2; font-size: 10px; }
+        .requiredMark { color: red; }
+        .addButton, .removeButton { color: white !important; border: 1px solid #999999; width: 20px; height: 20px; padding: 0 !important; cursor: pointer; font-weight: bold; border-radius: 2px; font-size: 18px !important; line-height: 18px; text-align: center; display: flex; align-items: center; justify-content: center; text-decoration: none !important; }
+        .addButton { background-color: #8b0000 !important; }
+        .removeButton { background-color: #444 !important; }
+        .greyAddButton { background-color: #d8d8d8 !important; color: #444 !important; border: 1px solid #999999; width: 20px; height: 20px; font-weight: bold; border-radius: 2px; display: flex; align-items: center; justify-content: center; text-decoration: none !important; }
+        .disabledInput { background-color: #f0f0f0 !important; color: #888 !important; cursor: not-allowed; }
+        .aeInput { height: 16px !important; font-size: 10px !important; padding: 1px 2px !important; }
+        
+        /* Modal Window Design (Microsoft Edge Look) */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); }
+        .modal-content { background-color: white; margin: 10% auto; padding: 0; border: 1px solid #666; width: 650px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border-radius: 4px; overflow: hidden; }
+        .modal-header { background-color: #f3f3f3; padding: 8px 12px; border-bottom: 1px solid #ccc; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #333; font-family: 'Segoe UI', Arial, sans-serif; }
+        .modal-body { padding: 30px 40px; background-color: white; }
+        .modal-title { color: #000; font-weight: bold; font-size: 15px; margin-bottom: 30px; display: flex; align-items: center; }
+        .modal-title::before { content: "::"; color: #c27a4d; margin-right: 10px; font-size: 18px; font-weight: bold; }
+        .complaint-form-row { display: flex; margin-bottom: 20px; align-items: center; }
+        .complaint-form-row label { width: 240px; font-weight: bold; color: #333; font-size: 12px; }
+        .complaint-form-row input, .complaint-form-row textarea { border: 1px solid #888; padding: 5px; background-color: #fff; font-size: 12px; width: 100%; }
+        
+        .detailsLink { color: red; text-decoration: none; cursor: pointer; font-size: 10px; font-weight: bold; }
+        .subSectionHeader { background: #9c918a; color: #ffffff; font-weight: bold; font-size: 11px; padding: 3px 8px; border-bottom: 1px solid #d58f82; display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
+        .checkboxGrid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; padding: 8px; }
+        .checkboxItem { display: flex; align-items: center; font-size: 10px; }
+        .fullWidthTextarea { width: 100%; height: 150px; border: 1px solid #015ba7; padding: 5px; margin-top: 5px; resize: vertical; }
+        .addAECheckbox { display: flex; align-items: center; font-size: 11px; font-weight: bold; color: white; }
+    </style>
+
+    <script>
+        function openModal() { document.getElementById('detailsModal').style.display = 'block'; }
+        function closeModal() { document.getElementById('detailsModal').style.display = 'none'; }
+    </script>
+
+    <apex:form id="productForm">
+        <apex:pageMessages id="msgs" />
+        <apex:actionFunction name="saveAndCloseModal" action="{!saveDetails}" reRender="none" oncomplete="closeModal();" />
+        <apex:outputPanel id="productTablePanel">
+            <div class="sourceWrap">
+                <div class="sourceHeader">Product Information</div>
+                <div class="sourceInner">
+                    <table class="productTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 25px;">Sr.<br/>No.</th>
+                                <th style="width: 70px;">Product <span class="requiredMark">*</span></th>
+                                <th style="width: 65px;">Product Type</th>
+                                <th style="width: 60px;">Indication</th>
+                                <th style="width: 45px;">Dose</th>
+                                <th style="width: 55px;">Frequency</th>
+                                <th style="width: 85px;">Route of<br/>Administering</th>
+                                <th style="width: 50px;">Lot<br/>Number</th>
+                                <th style="width: 85px;">Expiry Date<br/>(DD/MM/YYYY)</th>
+                                <th style="width: 85px;">Therapy Start<br/>Date<br/>(DD/MM/YYYY)</th>
+                                <th style="width: 85px;">Therapy End<br/>Date<br/>(DD/MM/YYYY)</th>
+                                <th style="width: 85px;">Product<br/>Pickup<br/>Availability<br/>Status Is</th>
+                                <th style="width: 85px;">Is this a<br/>Technical<br/>complaint ?</th>
+                                <th style="width: 75px;">Technical<br/>Complaint</th>
+                                <th style="width: 60px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>  
+                            <apex:repeat value="{!rows}" var="row">
+                                <tr>
+                                    <td>{!row.srNo}</td>
+                                    <td>
+                                        <apex:inputText value="{!row.productName}" styleClass="unifiedTextBox">
+                                            <apex:actionSupport event="onchange" action="{!fetchProductDetails}" reRender="productTablePanel">
+                                                <apex:param name="rowIdx" value="{!row.srNo}" />
+                                            </apex:actionSupport>
+                                        </apex:inputText>
+                                    </td>
+                                    <td><apex:inputText value="{!row.productType}" styleClass="unifiedTextBox" /></td>
+                                    <td><apex:inputText value="{!row.indication}" styleClass="unifiedTextBox" /></td>
+                                    <td><apex:inputText value="{!row.dose}" styleClass="unifiedTextBox" /></td>
+                                    <td><apex:inputText value="{!row.frequency}" styleClass="unifiedTextBox" /></td>
+                                    <td><apex:inputText value="{!row.route}" styleClass="unifiedTextBox" /></td>
+                                    <td><apex:inputText value="{!row.lotNumber}" styleClass="unifiedTextBox" /></td>
+                                    <td><apex:input type="date" value="{!row.expiryDate}" styleClass="unifiedTextBox" /></td>
+                                    <td><apex:input type="date" value="{!row.therapyStartDate}" styleClass="unifiedTextBox" /></td>
+                                    <td><apex:input type="date" value="{!row.therapyEndDate}" styleClass="unifiedTextBox" /></td>
+                                    <td class="picklistBox">
+                                        <apex:selectList value="{!row.pickupStatus}" size="1">
+                                            <apex:selectOption itemValue="Unknown" itemLabel="Unknown"/><apex:selectOption itemValue="Yes" itemLabel="Yes"/><apex:selectOption itemValue="No" itemLabel="No"/>
+                                        </apex:selectList>
+                                    </td>
+                                    <td class="picklistBox">
+                                        <apex:selectList value="{!row.technicalComplaint}" size="1">
+                                            <apex:selectOption itemValue="Unknown" itemLabel="Unknown"/><apex:selectOption itemValue="Yes" itemLabel="Yes"/><apex:selectOption itemValue="No" itemLabel="No"/>
+                                        </apex:selectList>
+                                    </td>
+                                    <td>
+                                        <apex:commandLink value="Details" action="{!showDetails}" reRender="modalContent" oncomplete="openModal();" styleClass="detailsLink" immediate="true">
+                                            <apex:param name="rowIndex" value="{!row.srNo}" assignTo="{!selectedRowIndex}" />
+                                        </apex:commandLink>
+                                    </td>
+                                    <td style="display:flex; gap:2px; justify-content:center;">
+                                        <apex:actionRegion >
+                                            <apex:commandLink action="{!addRow}" reRender="productTablePanel" styleClass="addButton" rendered="{!rows.size < 10}"><span>+</span></apex:commandLink>
+                                            <apex:commandLink action="{!removeRow}" reRender="productTablePanel" styleClass="removeButton" rendered="{!rows.size > 1}">
+                                                <span>-</span><apex:param name="rowToDel" value="{!row.srNo}" assignTo="{!rowToRemoveIndex}" />
+                                            </apex:commandLink>
+                                        </apex:actionRegion>
+                                    </td>
+                                </tr>
+                            </apex:repeat>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </apex:outputPanel>
+
+        <div class="sourceWrap">
+            <div class="sourceHeader">Adverse Event Information</div>
+            <div class="sourceInner">
+                <div class="subSectionHeader">Event Seriousness</div>
+                <div class="checkboxGrid">
+                    <div class="checkboxItem"><apex:inputCheckbox value="{!seriousnessDeath}"/> Death</div>
+                    <div class="checkboxItem"><apex:inputCheckbox value="{!seriousnessLifeThreatening}"/> Life Threatening</div>
+                    <div class="checkboxItem"><apex:inputCheckbox value="{!seriousnessDisability}"/> Disability</div>
+                    <div class="checkboxItem"><apex:inputCheckbox value="{!seriousnessHospitalization}"/> Hospitalization - Initial or Prolonged</div>
+                    <div class="checkboxItem"><apex:inputCheckbox value="{!seriousnessCongenitalAnomaly}"/> Congenital Anomaly</div>
+                    <div class="checkboxItem"><apex:inputCheckbox value="{!seriousnessOther}"/> Other</div>
+                </div>
+                <div class="subSectionHeader">
+                    <span>Event Detail</span>
+                    <div class="addAECheckbox">
+                        <apex:inputCheckbox value="{!addIndividualEventsFlag}" style="margin-right: 4px;" /> <span style="text-decoration: underline;">Add Individual Events</span>
+                    </div>
+                </div>
+                <div style="padding: 10px;">
+                    <div style="font-weight: bold; font-size: 10px;">Event Description <span class="requiredMark">*</span></div>
+                    <apex:inputTextarea value="{!eventDescription}" id="eventDesc" styleClass="fullWidthTextarea" />
+                    <apex:outputPanel id="aeTablePanel" layout="block" style="margin-top: 15px;">
+                        <table class="productTable">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;">AE No.</th>
+                                    <th style="width: 200px;">Event</th>
+                                    <th style="width: 150px;">AE Start Date<br/>(DD/MM/YYYY)</th>
+                                    <th style="width: 150px;">AE End Date<br/>(DD/MM/YYYY)</th>
+                                    <th style="width: 150px;">Outcome</th>
+                                    <th style="width: 60px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <apex:repeat value="{!aeRows}" var="ae">
+                                    <tr>
+                                        <td><apex:inputText value="{!ae.aeNo}" styleClass="unifiedTextBox aeInput" style="width: 40px !important;" /></td>
+                                        <td><apex:inputText value="{!ae.eventName}" styleClass="unifiedTextBox aeInput" style="width: 180px !important;" /></td>
+                                        <td><apex:input type="date" value="{!ae.startDate}" styleClass="unifiedTextBox aeInput" style="width: 110px !important;" /></td>
+                                        <td><apex:input type="date" value="{!ae.endDate}" styleClass="unifiedTextBox aeInput" style="width: 110px !important;" /></td>
+                                        <td class="picklistBox">
+                                            <apex:selectList value="{!ae.outcome}" size="1" disabled="true" styleClass="aeInput disabledInput" style="width: 110px !important;">
+                                                <apex:selectOption itemValue="" itemLabel="Unknown"/>
+                                                <apex:selectOption itemValue="Recovered" itemLabel="Recovered"/>
+                                                <apex:selectOption itemValue="Not Recovered" itemLabel="Not Recovered"/>
+                                            </apex:selectList>
+                                        </td>
+                                        <td style="display:flex; gap:2px; justify-content:center;">
+                                            <apex:actionRegion >
+                                                <apex:commandLink action="{!addAERow}" reRender="aeTablePanel" styleClass="greyAddButton" rendered="{!aeRows.size < 10}"><span>+</span></apex:commandLink>
+                                                <apex:commandLink action="{!removeAERow}" reRender="aeTablePanel" styleClass="removeButton" rendered="{!aeRows.size > 1}">
+                                                    <span>-</span><apex:param name="aeToDel" value="{!ae.aeNo}" assignTo="{!aeRowToRemoveIndex}" />
+                                                </apex:commandLink>
+                                            </apex:actionRegion>
+                                        </td>
+                                    </tr>
+                                </apex:repeat>
+                            </tbody>
+                        </table>
+                    </apex:outputPanel>
+                </div>
+                <div class="subSectionHeader">Relevant Medical History and Significant Lab/Test Data (including dates)</div>
+                <div style="padding: 10px;"><apex:inputTextarea value="{!relevantMedicalHistory}" id="medHist" styleClass="fullWidthTextarea" style="height: 100px;" /></div>
+            </div>
+        </div>
+
+        <!-- Technical Complaint Modal -->
+        <div id="detailsModal" class="modal">
+            <apex:outputPanel id="modalContent" layout="block" styleClass="modal-content">
+                <div class="modal-header">
+                    <span>Novartis Argus-CIC - Work - Microsoft Edge</span>
+                    <span style="cursor:pointer; font-weight:bold; font-size: 14px; color: #444;" onclick="saveAndCloseModal()">&#10006;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-title">TECHNICAL COMPLAINT</div>
+                    <div class="complaint-form-row">
+                        <label>Technical Complaint #</label>
+                        <apex:inputText value="{!selectedRow.technicalComplaintNumber}" style="width: 140px;" />
+                    </div>
+                    <div class="complaint-form-row">
+                        <label>Technical Complaint Description</label>
+                        <apex:inputTextarea value="{!selectedRow.technicalComplaintDescription}" style="width: 320px; height: 120px;" />
+                    </div>
+                </div>
+            </apex:outputPanel>
+        </div>
+    </apex:form>
+</apex:page>

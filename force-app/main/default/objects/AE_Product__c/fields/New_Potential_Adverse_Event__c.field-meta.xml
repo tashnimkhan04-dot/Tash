@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>New_Potential_Adverse_Event__c</fullName>
+    <label>New Potential Adverse Event</label>
+    <referenceTo>New_Potential_Adverse_Event__c</referenceTo>
+    <relationshipLabel>AE Products</relationshipLabel>
+    <relationshipName>AE_Products</relationshipName>
+    <relationshipOrder>0</relationshipOrder>
+    <reparentableMasterDetail>false</reparentableMasterDetail>
+    <trackTrending>false</trackTrending>
+    <type>MasterDetail</type>
+    <writeRequiresMasterRead>false</writeRequiresMasterRead>
+</CustomField>

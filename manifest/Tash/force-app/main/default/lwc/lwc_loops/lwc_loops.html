@@ -1,0 +1,15 @@
+<template>
+    <lightning-card title="looping through an array">
+        <p> This is one way of looping through an array:</p>    
+        <template for:each={cities} for:item="city">
+            <p key={city}>{city}</p>
+        </template> <br/>
+
+        <p> This is another way of looping through an array:</p>
+        <template iterator:city={cities}>
+            <p key={city.value}>{city.value}</p>
+        </template>
+
+    </lightning-card>
+          
+</template>

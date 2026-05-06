@@ -1,0 +1,9 @@
+<template>
+    <lightning-card>
+        <p>This message is coming from the child component: {messageFromChild}</p>
+        <!---Below we are including the child component -->
+        <c-lwc_-child-component-custom-event onselected={handleChildEvent}></c-lwc_-child-component-custom-event>
+
+    </lightning-card>
+
+</template>

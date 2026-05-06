@@ -1,0 +1,22 @@
+<template>
+
+    <lightning-card title="Accounts List" icon-name="standard:account">
+        <div class="slds-m-around_medium">
+            <template if:true={accounts}>
+                <template for:each={accounts} for:item="account">
+                    <div key={account.Id} class="account-name">{account.Name}
+                        <p>Industry: {account.Industry}</p>
+                    </div>
+
+                </template>
+                
+            </template>
+            <template if:true={error}>
+                <div class="slds-text-color_error">Error loading accounts: {error.body.message}</div>
+
+            </template>
+        </div>
+    </lightning-card>
+
+    
+</template>

@@ -1,0 +1,34 @@
+<template>
+    <lightning-card title="Record Details">
+        <template if:true={account.data}>
+            <div class="slds-m-around_medium">
+                <div class="slds-form">
+                    <div class="slds-form-element">
+                        <label class="slds-form-element__label">Name</label>
+                        <div class="slds-form-element__control">
+                            <p>{name}</p>
+                        </div>
+                    </div>
+                    <div class="slds-form-element">
+                        <label class="slds-form-element__label">Phone</label>
+                        <div class="slds-form-element__control">
+                            <lightning-formatted-phone value={phone}></lightning-formatted-phone>
+                        </div>
+                    </div>
+                    <div class="slds-form-element">
+                        <label class="slds-form-element__label">Industry</label>
+                        <div class="slds-form-element__control">
+                            <p>{industry}</p>  
+                        </div> 
+                    </div>
+                </div> <!-- Added this missing tag -->
+            </div> <!-- Added this missing tag -->
+        </template>       
+
+        <template if:true={account.error}>
+            <div class="slds-m-around_medium slds-text-color_error">
+                {account.error.body.message}
+            </div>
+        </template>
+    </lightning-card>
+</template>

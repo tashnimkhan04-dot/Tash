@@ -1,0 +1,10 @@
+<template>
+    <lightning-card title="Create Account Using Server Side Implementation">
+        <lightning-input type="text" label="Account Name" value={accountName} onchange={handleAccountNameChange}></lightning-input>
+        <lightning-input type="text" label="Account Rating" value={accountRating} onchange={handleAccountRatingChange}></lightning-input>
+        <lightning-input type="text" label="Account Industry" value={accountIndustry} onchange={handleAccountIndustryChange}></lightning-input>
+
+        <lightning-button label="Create Account" onclick={createAccount}></lightning-button>
+        
+    </lightning-card>
+</template>

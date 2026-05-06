@@ -1,0 +1,19 @@
+<template>
+    <lightning-card title="Employee Details">
+
+        <lightning-input label="Employee Name" type="text" onchange={handleEmployeeNameChange}></lightning-input>
+        <lightning-input label="Employee Age" type="number" onchange={handleEmployeeAgeChange}></lightning-input>
+        <lightning-input label="Currency" type="text" onchange={handleEmployeeCurrencyChange}></lightning-input>
+        <lightning-input label="Employee Salary" type="number" onchange={handleEmployeeSalaryChange}></lightning-input>
+
+        <lightning-button label="Submit" onclick={saveEmployeeDetails}></lightning-button> <br/><br/>
+        <p>-------output--------</p>
+            <p>Employee Name: {employeeName1}</p>
+            <p>Employee Age: {employeeAge1}</p>
+            <p>Employee Salary: {employeeSalary1}</p>
+            <p>Employee Currency: {Currency1}</p>
+      
+
+    </lightning-card>
+    
+</template>
