@@ -34,6 +34,7 @@
         .checkboxItem { display: flex; align-items: center; font-size: 10px; }
         .fullWidthTextarea { width: 100%; height: 150px; border: 1px solid #015ba7; padding: 5px; margin-top: 5px; resize: vertical; }
         .addAECheckbox { display: flex; align-items: center; font-size: 11px; font-weight: bold; color: white; }
+        .submitBtn { background: #0070d2; color: white; border: none; padding: 8px 25px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px; }
     </style>
 
     <script>
@@ -134,7 +135,9 @@
                 <div class="subSectionHeader">
                     <span>Event Detail</span>
                     <div class="addAECheckbox">
-                        <apex:inputCheckbox value="{!addIndividualEventsFlag}" style="margin-right: 4px;" /> <span style="text-decoration: underline;">Add Individual Events</span>
+                        <apex:inputCheckbox value="{!addIndividualEventsFlag}" style="margin-right: 4px;">
+                            <apex:actionSupport event="onclick" action="{!handleAEReset}" reRender="aeTablePanel" />
+                        </apex:inputCheckbox> <span style="text-decoration: underline;">Add Individual Events</span>
                     </div>
                 </div>
                 <div style="padding: 10px;">
@@ -156,19 +159,27 @@
                                 <apex:repeat value="{!aeRows}" var="ae">
                                     <tr>
                                         <td><apex:inputText value="{!ae.aeNo}" styleClass="unifiedTextBox aeInput" style="width: 40px !important;" /></td>
-                                        <td><apex:inputText value="{!ae.eventName}" styleClass="unifiedTextBox aeInput" style="width: 180px !important;" /></td>
+                                        <td>
+                                            <apex:inputText value="{!ae.eventName}" styleClass="unifiedTextBox aeInput" style="width: 180px !important;">
+                                                <apex:actionSupport event="onkeyup" reRender="outcomePanel" />
+                                            </apex:inputText>
+                                        </td>
                                         <td><apex:input type="date" value="{!ae.startDate}" styleClass="unifiedTextBox aeInput" style="width: 110px !important;" /></td>
                                         <td><apex:input type="date" value="{!ae.endDate}" styleClass="unifiedTextBox aeInput" style="width: 110px !important;" /></td>
                                         <td class="picklistBox">
-                                            <apex:selectList value="{!ae.outcome}" size="1" disabled="true" styleClass="aeInput disabledInput" style="width: 110px !important;">
-                                                <apex:selectOption itemValue="" itemLabel="Unknown"/>
-                                                <apex:selectOption itemValue="Recovered" itemLabel="Recovered"/>
-                                                <apex:selectOption itemValue="Not Recovered" itemLabel="Not Recovered"/>
-                                            </apex:selectList>
+                                            <apex:outputPanel id="outcomePanel" layout="none">
+                                                <apex:selectList value="{!ae.outcome}" size="1" disabled="{!IF(LEN(ae.eventName) > 0, false, true)}" styleClass="aeInput {!IF(LEN(ae.eventName) > 0, '', 'disabledInput')}" style="width: 110px !important;">
+                                                    <apex:selectOption itemValue="Unknown" itemLabel="Unknown"/>
+                                                    <apex:selectOption itemValue="Resolved" itemLabel="Resolved"/>
+                                                    <apex:selectOption itemValue="Improved" itemLabel="Improved"/>
+                                                    <apex:selectOption itemValue="Worsened" itemLabel="Worsened"/>
+                                                    <apex:selectOption itemValue="No Change" itemLabel="No Change"/>
+                                                </apex:selectList>
+                                            </apex:outputPanel>
                                         </td>
                                         <td style="display:flex; gap:2px; justify-content:center;">
                                             <apex:actionRegion >
-                                                <apex:commandLink action="{!addAERow}" reRender="aeTablePanel" styleClass="greyAddButton" rendered="{!aeRows.size < 10}"><span>+</span></apex:commandLink>
+                                                <apex:commandLink action="{!addAERow}" reRender="aeTablePanel" styleClass="{!IF(addIndividualEventsFlag, 'greyAddButton', 'addButton disabledInput')}" rendered="{!aeRows.size < 10}" onclick="{!IF(addIndividualEventsFlag, '', 'return false;')}"><span>+</span></apex:commandLink>
                                                 <apex:commandLink action="{!removeAERow}" reRender="aeTablePanel" styleClass="removeButton" rendered="{!aeRows.size > 1}">
                                                     <span>-</span><apex:param name="aeToDel" value="{!ae.aeNo}" assignTo="{!aeRowToRemoveIndex}" />
                                                 </apex:commandLink>
@@ -183,6 +194,10 @@
                 <div class="subSectionHeader">Relevant Medical History and Significant Lab/Test Data (including dates)</div>
                 <div style="padding: 10px;"><apex:inputTextarea value="{!relevantMedicalHistory}" id="medHist" styleClass="fullWidthTextarea" style="height: 100px;" /></div>
             </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 20px; padding-bottom: 30px;">
+            <apex:commandButton value="Submit Record" action="{!saveAllData}" styleClass="submitBtn" />
         </div>
 
         <!-- Technical Complaint Modal -->
@@ -201,6 +216,9 @@
                     <div class="complaint-form-row">
                         <label>Technical Complaint Description</label>
                         <apex:inputTextarea value="{!selectedRow.technicalComplaintDescription}" style="width: 320px; height: 120px;" />
+                    </div>
+                    <div style="text-align: right; margin-top: 15px;">
+                        <button type="button" class="submitBtn" onclick="saveAndCloseModal()">OK</button>
                     </div>
                 </div>
             </apex:outputPanel>

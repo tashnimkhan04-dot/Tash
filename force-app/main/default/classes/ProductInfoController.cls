@@ -18,15 +18,25 @@ public with sharing class ProductInfoController {
         rows = new List<ProductRow>{ new ProductRow(1) };
         aeRows = new List<AERow>{ new AERow(1) };
         
-        String caseId = ApexPages.currentPage().getParameters().get('caseId');
-        if (String.isNotBlank(caseId)) {
-            try {
-                String query = 'SELECT Product_Indication__c FROM Case WHERE Id = :caseId LIMIT 1';
-                List<SObject> caseRecords = Database.query(query);
-                if (!caseRecords.isEmpty() && caseRecords[0].get('Product_Indication__c') != null) {
-                    rows[0].indication = (String)caseRecords[0].get('Product_Indication__c');
-                }
-            } catch (Exception e) { System.debug('Case fetch failed: ' + e.getMessage()); }
+        // Pre-fill Product Name and Type from the first MICC Product record on page load
+        try {
+            List<MICC_Product__c> miccList = [
+                SELECT Id, Name, Product_Type__c
+                FROM   MICC_Product__c
+                ORDER BY CreatedDate ASC
+                LIMIT  1
+            ];
+            if (!miccList.isEmpty()) {
+                rows[0].productName                     = miccList[0].Name;
+                rows[0].productType                     = miccList[0].Product_Type__c;
+                rows[0].productObj.MICC_Product_Link__c = miccList[0].Id;
+            }
+        } catch (Exception e) { System.debug('MICC Product fetch failed: ' + e.getMessage()); }
+    }
+
+    public void handleAEReset() {
+        if (!addIndividualEventsFlag) {
+            aeRows = new List<AERow>{ new AERow(1) };
         }
     }
 
@@ -41,7 +51,6 @@ public with sharing class ProductInfoController {
                     if (!master.isEmpty()) {
                         currentRow.productObj.MICC_Product_Link__c = master[0].Id;
                         currentRow.productType = master[0].Product_Type__c;
-                        // Indication is NOT fetched from MICC as per request
                     }
                 }
             }
@@ -102,7 +111,7 @@ public with sharing class ProductInfoController {
         public Date startDate {get; set;}
         public Date endDate {get; set;}
         public String outcome {get; set;}
-        public AERow(Integer no) { this.aeNo = no; this.eventName = ''; this.outcome = 'Unknown'; }
+        public AERow(Integer no) { this.aeNo = no; this.eventName = ''; this.outcome = 'unknown'; }
     }
 
     public Integer selectedRowIndex {get; set;}
@@ -125,31 +134,39 @@ public with sharing class ProductInfoController {
             mainAE.Event_Description__c = eventDescription;
             mainAE.Relevant_Medical_History__c = relevantMedicalHistory;
 
-            if(!rows.isEmpty()) {
+            if (!rows.isEmpty()) {
                 ProductRow r = rows[0];
-                mainAE.Product_Name__c = r.productName;
-                mainAE.Product_Type__c = r.productType;
-                mainAE.Product_Indication__c = r.indication;
-                mainAE.Dose__c = r.dose;
-                mainAE.Frequency__c = r.frequency;
-                mainAE.Route_of_administering__c = r.route;
-                mainAE.Lot_Number__c = r.lotNumber;
-                mainAE.Expiry_Date__c = r.expiryDate;
-                mainAE.Therapy_Start_Date__c = r.therapyStartDate;
-                mainAE.Therapy_End_Date__c = r.therapyEndDate;
-                mainAE.Pickup_Status__c = r.pickupStatus;
-                mainAE.Is_Technical_Complaint__c = r.technicalComplaint;
-                mainAE.Technical_Complaint_Desc__c = r.technicalComplaintDescription;
+                mainAE.Product_Name__c               = r.productName;
+                mainAE.Product_Type__c               = r.productType;
+                mainAE.Product_Indication__c         = r.indication;
+                mainAE.Dose__c                       = r.dose;
+                mainAE.Frequency__c                  = r.frequency;
+                mainAE.Route_of_administering__c     = r.route;
+                mainAE.Lot_Number__c                 = r.lotNumber;
+                mainAE.Expiry_Date__c                = r.expiryDate;
+                mainAE.Therapy_Start_Date__c         = r.therapyStartDate;
+                mainAE.Therapy_End_Date__c           = r.therapyEndDate;
+                mainAE.Pickup_Status__c              = r.pickupStatus;
+                mainAE.Is_Technical_Complaint__c     = r.technicalComplaint;
+                mainAE.Technical_Complaint_Desc__c   = r.technicalComplaintDescription;
                 mainAE.Technical_Complaint_Number__c = r.technicalComplaintNumber;
-                mainAE.MICC_Product_Link__c = r.productObj.MICC_Product_Link__c;
+                mainAE.MICC_Product_Link__c          = r.productObj.MICC_Product_Link__c;
+            }
+
+            String caseId = ApexPages.currentPage().getParameters().get('caseId');
+            if (String.isNotBlank(caseId)) {
+                List<Case> cases = [SELECT Product_Indication__c FROM Case WHERE Id = :caseId LIMIT 1];
+                if (!cases.isEmpty() && cases[0].Product_Indication__c != null) {
+                    mainAE.Product_Indication__c = cases[0].Product_Indication__c;
+                }
             }
             
-            if(!aeRows.isEmpty()) {
+            if (!aeRows.isEmpty()) {
                 AERow ae = aeRows[0];
                 mainAE.AE_Event_Name__c = ae.eventName;
                 mainAE.AE_Start_Date__c = ae.startDate;
-                mainAE.AE_End_Date__c = ae.endDate;
-                mainAE.Outcome__c = ae.outcome;
+                mainAE.AE_End_Date__c   = ae.endDate;
+                mainAE.Outcome__c       = ae.outcome;
             }
 
             insert mainAE;
