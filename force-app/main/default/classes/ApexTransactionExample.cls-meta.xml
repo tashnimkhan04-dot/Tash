@@ -105,9 +105,7 @@ public PAE_ProductInfoController(ApexPages.StandardController sc) {
                         <td>{!row['technicalComplaint']}</td>
                         <td>
                             {!row['technicalComplaintNumber']}
-                            <apex:outputText rendered="{!NOT(ISBLANK(TEXT(row['technicalComplaintDescription'])))}">
-                                <br/>{!row['technicalComplaintDescription']}
-                            </apex:outputText>
+                            <br/>{!row['technicalComplaintDescription']}
                         </td>
                     </tr>
                 </apex:repeat>
