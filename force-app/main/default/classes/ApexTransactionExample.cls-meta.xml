@@ -1,20 +1,27 @@
-public class PAE_ProductInfoController {
-    public List<Map<String, Object>> productRows { get; set; }
-    
-    public PAE_ProductInfoController(ApexPages.StandardController sc) {
-        productRows = new List<Map<String, Object>>();
-        New_Potential_Adverse_Event__c pae = [
-            SELECT Product_Info_JSON__c 
-            FROM New_Potential_Adverse_Event__c 
-            WHERE Id = :sc.getId()
-        ];
-        if (String.isNotBlank(pae.Product_Info_JSON__c)) {
-            List<Object> parsed = (List<Object>) JSON.deserializeUntyped(pae.Product_Info_JSON__c);
-            for (Object obj : parsed) {
-                Map<String, Object> row = (Map<String, Object>) obj;
-                if (row.get('productName') != null || row.get('productType') != null) {
-                    productRows.add(row);
-                }
+public PAE_ProductInfoController(ApexPages.StandardController sc) {
+    productRows = new List<Map<String, Object>>();
+    New_Potential_Adverse_Event__c pae = [
+        SELECT Product_Info_JSON__c 
+        FROM New_Potential_Adverse_Event__c 
+        WHERE Id = :sc.getId()
+    ];
+    if (String.isNotBlank(pae.Product_Info_JSON__c)) {
+        List<Object> parsed = (List<Object>) JSON.deserializeUntyped(pae.Product_Info_JSON__c);
+        for (Object obj : parsed) {
+            Map<String, Object> row = (Map<String, Object>) obj;
+            // ensure all keys exist
+            if (!row.containsKey('expiryDate')) row.put('expiryDate', null);
+            if (!row.containsKey('therapyStartDate')) row.put('therapyStartDate', null);
+            if (!row.containsKey('therapyEndDate')) row.put('therapyEndDate', null);
+            if (!row.containsKey('indication')) row.put('indication', null);
+            if (!row.containsKey('dose')) row.put('dose', null);
+            if (!row.containsKey('frequency')) row.put('frequency', null);
+            if (!row.containsKey('route')) row.put('route', null);
+            if (!row.containsKey('lotNumber')) row.put('lotNumber', null);
+            if (!row.containsKey('technicalComplaintNumber')) row.put('technicalComplaintNumber', null);
+            if (!row.containsKey('technicalComplaintDescription')) row.put('technicalComplaintDescription', null);
+            if (row.get('productName') != null || row.get('productType') != null) {
+                productRows.add(row);
             }
         }
     }
