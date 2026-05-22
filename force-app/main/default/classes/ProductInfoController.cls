@@ -109,13 +109,13 @@
             max-width: 100%;
             overflow-x: auto;
             overflow-y: hidden;
-            margin: 0;
             padding: 0;
+            margin: 0;
         }
 
         .prodTable {
             width: 100%;
-            min-width: 1200px;
+            min-width: 100%;
             border-collapse: collapse;
             table-layout: fixed;
         }
@@ -152,9 +152,7 @@
         }
     </style>
 
-    <apex:outputPanel layout="block"
-                      rendered="{!productRows.size > 0}"
-                      style="width:100%;">
+    <apex:outputPanel layout="block" rendered="{!productRows.size > 0}" style="width:100%;">
         <div class="tableWrapper">
             <table class="prodTable">
                 <thead>
@@ -198,9 +196,7 @@
         </div>
     </apex:outputPanel>
 
-    <apex:outputPanel layout="block"
-                      rendered="{!productRows.size == 0}"
-                      style="width:100%;">
+    <apex:outputPanel layout="block" rendered="{!productRows.size == 0}" style="width:100%;">
         <p class="noData">No product information available.</p>
     </apex:outputPanel>
 
