@@ -99,11 +99,20 @@
             font-size: 11px;
             margin: 0;
             padding: 5px;
+            overflow-x: auto;
+        }
+
+        .tableWrapper {
+            width: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
         }
 
         .prodTable {
+            min-width: 1100px;
             width: 100%;
             border-collapse: collapse;
+            table-layout: fixed;
         }
 
         .prodTable th {
@@ -113,6 +122,8 @@
             text-align: center;
             font-size: 10px;
             border: 1px solid #d58f82;
+            white-space: normal;
+            word-wrap: break-word;
         }
 
         .prodTable td {
@@ -121,6 +132,8 @@
             text-align: center;
             font-size: 10px;
             background: #fff;
+            white-space: normal;
+            word-wrap: break-word;
         }
 
         .prodTable tr:nth-child(even) td {
@@ -135,45 +148,47 @@
     </style>
 
     <apex:outputPanel rendered="{!productRows.size > 0}">
-        <table class="prodTable">
-            <thead>
-                <tr>
-                    <th>Sr No</th>
-                    <th>Product</th>
-                    <th>Product Type</th>
-                    <th>Indication</th>
-                    <th>Dose</th>
-                    <th>Frequency</th>
-                    <th>Route</th>
-                    <th>Lot No</th>
-                    <th>Expiry Date</th>
-                    <th>Therapy Start</th>
-                    <th>Therapy End</th>
-                    <th>Pickup Status</th>
-                    <th>Technical Complaint</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                <apex:repeat value="{!productRows}" var="row">
+        <div class="tableWrapper">
+            <table class="prodTable">
+                <thead>
                     <tr>
-                        <td>{!row.srNo}</td>
-                        <td>{!row.productName}</td>
-                        <td>{!row.productType}</td>
-                        <td>{!row.indication}</td>
-                        <td>{!row.dose}</td>
-                        <td>{!row.frequency}</td>
-                        <td>{!row.route}</td>
-                        <td>{!row.lotNumber}</td>
-                        <td>{!row.expiryDate}</td>
-                        <td>{!row.therapyStartDate}</td>
-                        <td>{!row.therapyEndDate}</td>
-                        <td>{!row.pickupStatus}</td>
-                        <td>{!row.technicalComplaint}</td>
+                        <th>Sr No</th>
+                        <th>Product</th>
+                        <th>Product Type</th>
+                        <th>Indication</th>
+                        <th>Dose</th>
+                        <th>Frequency</th>
+                        <th>Route</th>
+                        <th>Lot No</th>
+                        <th>Expiry Date</th>
+                        <th>Therapy Start</th>
+                        <th>Therapy End</th>
+                        <th>Pickup Status</th>
+                        <th>Technical Complaint</th>
                     </tr>
-                </apex:repeat>
-            </tbody>
-        </table>
+                </thead>
+
+                <tbody>
+                    <apex:repeat value="{!productRows}" var="row">
+                        <tr>
+                            <td>{!row.srNo}</td>
+                            <td>{!row.productName}</td>
+                            <td>{!row.productType}</td>
+                            <td>{!row.indication}</td>
+                            <td>{!row.dose}</td>
+                            <td>{!row.frequency}</td>
+                            <td>{!row.route}</td>
+                            <td>{!row.lotNumber}</td>
+                            <td>{!row.expiryDate}</td>
+                            <td>{!row.therapyStartDate}</td>
+                            <td>{!row.therapyEndDate}</td>
+                            <td>{!row.pickupStatus}</td>
+                            <td>{!row.technicalComplaint}</td>
+                        </tr>
+                    </apex:repeat>
+                </tbody>
+            </table>
+        </div>
     </apex:outputPanel>
 
     <apex:outputPanel rendered="{!productRows.size == 0}">
