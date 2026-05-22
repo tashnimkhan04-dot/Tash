@@ -92,5 +92,7 @@ Visualforce reads Product_Info_JSON__c
 JSON is converted back into rows
 ↓
 Product Information table displays all rows
-Individual fields are important for things like:
-If Product Name is an individual field, you can easily create a report like: Show all cases where Product Name = Adakveo
+
+SELECT Id, Name, Product_Info_JSON__c
+FROM New_Potential_Adverse_Event__c
+WHERE Name = 'PAE-00198'
