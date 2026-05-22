@@ -73,3 +73,24 @@ public with sharing class PAE_ProductInfoController {
         return '';
     }
 }
+User fills form
+↓
+Clicks Save
+↓
+Normal AE fields save normally
+↓
+First/main product row saves into individual fields
+↓
+All product rows save into Product_Info_JSON__c as JSON
+↓
+Record is created/updated
+↓
+When user opens record
+↓
+Visualforce reads Product_Info_JSON__c
+↓
+JSON is converted back into rows
+↓
+Product Information table displays all rows
+Individual fields are important for things like:
+If Product Name is an individual field, you can easily create a report like: Show all cases where Product Name = Adakveo
