@@ -94,23 +94,28 @@
            sidebar="false">
 
     <style>
+        html,
         body {
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
             font-family: Arial, sans-serif;
             font-size: 11px;
-            margin: 0;
-            padding: 5px;
-            overflow-x: auto;
         }
 
         .tableWrapper {
             width: 100%;
+            max-width: 100%;
             overflow-x: auto;
             overflow-y: hidden;
+            margin: 0;
+            padding: 0;
         }
 
         .prodTable {
-            min-width: 1100px;
             width: 100%;
+            min-width: 1200px;
             border-collapse: collapse;
             table-layout: fixed;
         }
@@ -147,7 +152,7 @@
         }
     </style>
 
-    <apex:outputPanel rendered="{!productRows.size > 0}">
+    <apex:outputPanel layout="block" rendered="{!productRows.size > 0}" style="width:100%;">
         <div class="tableWrapper">
             <table class="prodTable">
                 <thead>
@@ -191,7 +196,7 @@
         </div>
     </apex:outputPanel>
 
-    <apex:outputPanel rendered="{!productRows.size == 0}">
+    <apex:outputPanel layout="block" rendered="{!productRows.size == 0}" style="width:100%;">
         <p class="noData">No product information available.</p>
     </apex:outputPanel>
 
