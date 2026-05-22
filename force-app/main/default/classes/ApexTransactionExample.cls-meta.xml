@@ -1,5 +1,84 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<ApexClass xmlns="http://soap.sforce.com/2006/04/metadata">
-    <apiVersion>64.0</apiVersion>
-    <status>Active</status>
-</ApexClass>
+public class PAE_ProductInfoController {
+    public List<Map<String, Object>> productRows { get; set; }
+    
+    public PAE_ProductInfoController(ApexPages.StandardController sc) {
+        productRows = new List<Map<String, Object>>();
+        New_Potential_Adverse_Event__c pae = [
+            SELECT Product_Info_JSON__c 
+            FROM New_Potential_Adverse_Event__c 
+            WHERE Id = :sc.getId()
+        ];
+        if (String.isNotBlank(pae.Product_Info_JSON__c)) {
+            List<Object> parsed = (List<Object>) JSON.deserializeUntyped(pae.Product_Info_JSON__c);
+            for (Object obj : parsed) {
+                Map<String, Object> row = (Map<String, Object>) obj;
+                if (row.get('productName') != null || row.get('productType') != null) {
+                    productRows.add(row);
+                }
+            }
+        }
+    }
+}
+                    
+<apex:page standardController="New_Potential_Adverse_Event__c"
+           extensions="PAE_ProductInfoController"
+           readOnly="true"
+           showHeader="false"
+           sidebar="false">
+<style>
+    body { font-family: Arial, sans-serif; font-size: 11px; margin: 0; padding: 5px; }
+    .prodTable { width:100%; border-collapse:collapse; }
+    .prodTable th { background:#b7aca4; color:white; padding:5px 4px; text-align:center; font-size:10px; border:1px solid #d58f82; }
+    .prodTable td { border:1px solid #ddd; padding:4px; text-align:center; font-size:10px; background:#fff; }
+    .prodTable tr:nth-child(even) td { background:#f9f9f9; }
+    .noData { color:#888; font-size:11px; padding:5px; }
+</style>
+
+<apex:outputPanel rendered="{!productRows.size > 0}">
+    <table class="prodTable">
+        <thead>
+            <tr>
+                <th>Sr No</th>
+                <th>Product</th>
+                <th>Product Type</th>
+                <th>Indication</th>
+                <th>Dose</th>
+                <th>Frequency</th>
+                <th>Route</th>
+                <th>Lot No</th>
+                <th>Expiry Date</th>
+                <th>Therapy Start</th>
+                <th>Therapy End</th>
+                <th>Pickup Status</th>
+                <th>Technical Complaint</th>
+            </tr>
+        </thead>
+        <tbody>
+            <apex:repeat value="{!productRows}" var="row">
+                <tr>
+                    <td>{!row['srNo']}</td>
+                    <td>{!row['productName']}</td>
+                    <td>{!row['productType']}</td>
+                    <td>{!row['indication']}</td>
+                    <td>{!row['dose']}</td>
+                    <td>{!row['frequency']}</td>
+                    <td>{!row['route']}</td>
+                    <td>{!row['lotNumber']}</td>
+                    <td>{!row['expiryDate']}</td>
+                    <td>{!row['therapyStartDate']}</td>
+                    <td>{!row['therapyEndDate']}</td>
+                    <td>{!row['pickupStatus']}</td>
+                    <td>{!row['technicalComplaint']}</td>
+                </tr>
+            </apex:repeat>
+        </tbody>
+    </table>
+</apex:outputPanel>
+
+<apex:outputPanel rendered="{!productRows.size == 0}">
+    <p class="noData">No product information available.</p>
+</apex:outputPanel>
+
+</apex:page>
+
+                    
