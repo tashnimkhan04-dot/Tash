@@ -86,7 +86,6 @@
         return '';
     }
 }
-
 <apex:page standardController="New_Potential_Adverse_Event__c"
            extensions="PAE_ProductInfoController"
            readOnly="true"
@@ -94,28 +93,23 @@
            sidebar="false">
 
     <style>
-        html,
         body {
-            width: 100%;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
             font-family: Arial, sans-serif;
             font-size: 11px;
+            margin: 0;
+            padding: 5px;
+            overflow-x: auto;
         }
 
         .tableWrapper {
             width: 100%;
-            max-width: 100%;
             overflow-x: auto;
             overflow-y: hidden;
-            padding: 0;
-            margin: 0;
         }
 
         .prodTable {
+            min-width: 1100px;
             width: 100%;
-            min-width: 100%;
             border-collapse: collapse;
             table-layout: fixed;
         }
@@ -152,7 +146,7 @@
         }
     </style>
 
-    <apex:outputPanel layout="block" rendered="{!productRows.size > 0}" style="width:100%;">
+    <apex:outputPanel rendered="{!productRows.size > 0}">
         <div class="tableWrapper">
             <table class="prodTable">
                 <thead>
@@ -196,7 +190,7 @@
         </div>
     </apex:outputPanel>
 
-    <apex:outputPanel layout="block" rendered="{!productRows.size == 0}" style="width:100%;">
+    <apex:outputPanel rendered="{!productRows.size == 0}">
         <p class="noData">No product information available.</p>
     </apex:outputPanel>
 
