@@ -73,26 +73,11 @@ public with sharing class PAE_ProductInfoController {
         return '';
     }
 }
-User fills form
-↓
-Clicks Save
-↓
-Normal AE fields save normally
-↓
-First/main product row saves into individual fields
-↓
-All product rows save into Product_Info_JSON__c as JSON
-↓
-Record is created/updated
-↓
-When user opens record
-↓
-Visualforce reads Product_Info_JSON__c
-↓
-JSON is converted back into rows
-↓
-Product Information table displays all rows
-
-SELECT Id, Name, Product_Info_JSON__c
-FROM New_Potential_Adverse_Event__c
-WHERE Name = 'PAE-00198'
+if (!notesList.isEmpty()) {
+    String escalationNotes = '';
+    for (MICC_Notes__c note : notesList) {
+        String decryptedNote = MICC_UtilityClass.decrypt(note.Notes__c);
+        escalationNotes += decryptedNote + '\n\n';
+    }
+    description = 'Escalation Notes:\n' + escalationNotes;
+}
