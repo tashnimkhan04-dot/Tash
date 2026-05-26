@@ -81,3 +81,7 @@ if (!notesList.isEmpty()) {
     }
     description = 'Escalation Notes:\n' + escalationNotes;
 }
+SELECT Id, Name, Case__c, Notes__c, CreatedDate
+FROM MICC_Notes__c
+ORDER BY CreatedDate DESC
+LIMIT 10
