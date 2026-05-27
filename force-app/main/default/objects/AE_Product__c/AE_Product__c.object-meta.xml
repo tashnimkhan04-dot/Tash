@@ -1,165 +1,141 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
-    <actionOverrides>
-        <actionName>Accept</actionName>
-        <type>Default</type>
-    </actionOverrides>
-    <actionOverrides>
-        <actionName>Accept</actionName>
-        <formFactor>Large</formFactor>
-        <type>Default</type>
-    </actionOverrides>
-    <actionOverrides>
-        <actionName>Accept</actionName>
-        <formFactor>Small</formFactor>
-        <type>Default</type>
-    </actionOverrides>
-    <actionOverrides>
-        <actionName>CancelEdit</actionName>
-        <type>Default</type>
-    </actionOverrides>
-    <actionOverrides>
-        <actionName>CancelEdit</actionName>
-        <formFactor>Large</formFactor>
-        <type>Default</type>
-    </actionOverrides>
-    <actionOverrides>
-        <actionName>CancelEdit</actionName>
-        <formFactor>Small</formFactor>
-        <type>Default</type>
-    </actionOverrides>
-    <actionOverrides>
-        <actionName>Clone</actionName>
-        <type>Default</type>
-    </actionOverrides>
-    <actionOverrides>
-        <actionName>Clone</actionName>
-        <formFactor>Large</formFactor>
-        <type>Default</type>
-    </actionOverrides>
-    <actionOverrides>
-        <actionName>Clone</actionName>
-        <formFactor>Small</formFactor>
-        <type>Default</type>
-    </actionOverrides>
-    <actionOverrides>
-        <actionName>Delete</actionName>
-        <type>Default</type>
-    </actionOverrides>
-    <actionOverrides>
-        <actionName>Delete</actionName>
-        <formFactor>Large</formFactor>
-        <type>Default</type>
-    </actionOverrides>
-    <actionOverrides>
-        <actionName>Delete</actionName>
-        <formFactor>Small</formFactor>
-        <type>Default</type>
-    </actionOverrides>
-    <actionOverrides>
-        <actionName>Edit</actionName>
-        <type>Default</type>
-    </actionOverrides>
-    <actionOverrides>
-        <actionName>Edit</actionName>
-        <formFactor>Large</formFactor>
-        <type>Default</type>
-    </actionOverrides>
-    <actionOverrides>
-        <actionName>Edit</actionName>
-        <formFactor>Small</formFactor>
-        <type>Default</type>
-    </actionOverrides>
-    <actionOverrides>
-        <actionName>List</actionName>
-        <type>Default</type>
-    </actionOverrides>
-    <actionOverrides>
-        <actionName>List</actionName>
-        <formFactor>Large</formFactor>
-        <type>Default</type>
-    </actionOverrides>
-    <actionOverrides>
-        <actionName>List</actionName>
-        <formFactor>Small</formFactor>
-        <type>Default</type>
-    </actionOverrides>
-    <actionOverrides>
-        <actionName>New</actionName>
-        <type>Default</type>
-    </actionOverrides>
-    <actionOverrides>
-        <actionName>New</actionName>
-        <formFactor>Large</formFactor>
-        <type>Default</type>
-    </actionOverrides>
-    <actionOverrides>
-        <actionName>New</actionName>
-        <formFactor>Small</formFactor>
-        <type>Default</type>
-    </actionOverrides>
-    <actionOverrides>
-        <actionName>SaveEdit</actionName>
-        <type>Default</type>
-    </actionOverrides>
-    <actionOverrides>
-        <actionName>SaveEdit</actionName>
-        <formFactor>Large</formFactor>
-        <type>Default</type>
-    </actionOverrides>
-    <actionOverrides>
-        <actionName>SaveEdit</actionName>
-        <formFactor>Small</formFactor>
-        <type>Default</type>
-    </actionOverrides>
-    <actionOverrides>
-        <actionName>Tab</actionName>
-        <type>Default</type>
-    </actionOverrides>
-    <actionOverrides>
-        <actionName>Tab</actionName>
-        <formFactor>Large</formFactor>
-        <type>Default</type>
-    </actionOverrides>
-    <actionOverrides>
-        <actionName>Tab</actionName>
-        <formFactor>Small</formFactor>
-        <type>Default</type>
-    </actionOverrides>
-    <actionOverrides>
-        <actionName>View</actionName>
-        <type>Default</type>
-    </actionOverrides>
-    <actionOverrides>
-        <actionName>View</actionName>
-        <formFactor>Large</formFactor>
-        <type>Default</type>
-    </actionOverrides>
-    <actionOverrides>
-        <actionName>View</actionName>
-        <formFactor>Small</formFactor>
-        <type>Default</type>
-    </actionOverrides>
-    <allowInChatterGroups>false</allowInChatterGroups>
-    <compactLayoutAssignment>SYSTEM</compactLayoutAssignment>
-    <deploymentStatus>Deployed</deploymentStatus>
-    <enableActivities>false</enableActivities>
-    <enableBulkApi>true</enableBulkApi>
-    <enableFeeds>false</enableFeeds>
-    <enableHistory>false</enableHistory>
-    <enableLicensing>false</enableLicensing>
-    <enableReports>false</enableReports>
-    <enableSearch>false</enableSearch>
-    <enableSharing>true</enableSharing>
-    <enableStreamingApi>true</enableStreamingApi>
-    <externalSharingModel>ControlledByParent</externalSharingModel>
-    <label>AE Product</label>
-    <nameField>
-        <label>AE Product Name</label>
-        <type>Text</type>
-    </nameField>
-    <pluralLabel>AE Products</pluralLabel>
-    <searchLayouts></searchLayouts>
-    <sharingModel>ControlledByParent</sharingModel>
-    <visibility>Public</visibility>
-</CustomObject>
+Below are the exact files/components you need and where to put each one.
+
+File 1: Apex Class
+
+Create this in:
+
+Developer Console → File → New → Apex Class
+Class name:
+
+AE_CreateFormLauncherController
+Code:
+
+public with sharing class AE_CreateFormLauncherController {
+
+    @AuraEnabled(cacheable=true)
+    public static String getSourceId(Id caseId) {
+        Case c = [
+            SELECT Source_Id__c
+            FROM Case
+            WHERE Id = :caseId
+            LIMIT 1
+        ];
+
+        return c.Source_Id__c;
+    }
+}
+If your Case field API name is not Source_Id__c, replace it with the correct field.
+
+File 2: Aura Component
+
+Create this in:
+
+Developer Console → File → New → Lightning Component
+Component name:
+
+AE_CreateFormLauncher
+Code:
+
+<aura:component controller="AE_CreateFormLauncherController"
+                implements="force:hasRecordId,force:lightningQuickActionWithoutHeader"
+                access="global">
+
+    <lightning:workspaceAPI aura:id="workspace"/>
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+
+</aura:component>
+File 3: Aura Controller JS
+
+Open:
+
+AE_CreateFormLauncherController.js
+Code:
+
+({
+    doInit : function(component, event, helper) {
+        var caseId = component.get("v.recordId");
+
+        var action = component.get("c.getSourceId");
+        action.setParams({
+            caseId: caseId
+        });
+
+        action.setCallback(this, function(response) {
+            var sourceId = "AE Form";
+
+            if (response.getState() === "SUCCESS" && response.getReturnValue()) {
+                sourceId = response.getReturnValue();
+            }
+
+            var vfUrl = "/apex/CCMIC_AE_CreateForm?caseId=" + caseId;
+
+            var workspaceAPI = component.find("workspace");
+
+            workspaceAPI.isConsoleNavigation().then(function(isConsole) {
+                if (isConsole) {
+                    workspaceAPI.openTab({
+                        url: vfUrl,
+                        focus: true
+                    }).then(function(tabId) {
+                        workspaceAPI.setTabLabel({
+                            tabId: tabId,
+                            label: sourceId
+                        });
+                    });
+                } else {
+                    window.location.href = vfUrl;
+                }
+            }).catch(function(error) {
+                window.location.href = vfUrl;
+            });
+        });
+
+        $A.enqueueAction(action);
+    }
+})
+Step 4: Create Lightning Action
+
+Go to:
+
+Setup → Object Manager → Case → Buttons, Links, and Actions
+Click:
+
+New Action
+Select:
+
+Action Type: Lightning Component
+Lightning Component: c:AE_CreateFormLauncher
+Label: same as your existing button name
+Example label:
+
+Create AE Form
+Save.
+
+Step 5: Add Action To Layout
+
+Go to:
+
+Object Manager → Case → Page Layouts
+Open your page layout.
+
+Go to:
+
+Salesforce Mobile and Lightning Experience Actions
+Drag this action:
+
+Create AE Form
+into the action bar.
+
+Save.
+
+Step 6: Keep Existing Classic Button
+
+Do not delete your old Classic button.
+
+Classic will use:
+
+Visualforce button + sforce.console.setTabTitle(sourceId)
+Lightning will use:
+
+Aura action + workspaceAPI.setTabLabel(sourceId)
+Users can see the same button label in both places.
