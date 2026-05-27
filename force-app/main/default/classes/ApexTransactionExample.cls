@@ -73,15 +73,30 @@ public with sharing class PAE_ProductInfoController {
         return '';
     }
 }
-if (!notesList.isEmpty()) {
-    String escalationNotes = '';
-    for (MICC_Notes__c note : notesList) {
-        String decryptedNote = MICC_UtilityClass.decrypt(note.Notes__c);
-        escalationNotes += decryptedNote + '\n\n';
+function setConsoleTabTitle() {
+    try {
+        var sourceId = '{!JSENCODE(sourceId)}';
+        if (typeof sforce !== 'undefined' && sforce.console) {
+            // Classic Console
+            sforce.console.isInConsole(function(result) {
+                if (result.success && result.inConsole) {
+                    sforce.console.getEnclosingTabId(function(res) {
+                        if (res.success && res.id) {
+                            sforce.console.setTabTitle(sourceId, function(){}, res.id);
+                        }
+                    });
+                }
+            });
+        }
+        // Lightning Console
+        if (typeof sforce !== 'undefined' && sforce.one) {
+            sforce.one.subscribe('e.force:navigateToURL', function() {});
+        }
+        // Update browser/Lightning tab title directly
+        if (sourceId && sourceId !== '') {
+            document.title = sourceId;
+        }
+    } catch (e) {
+        if (window.console) { console.log(e); }
     }
-    description = 'Escalation Notes:\n' + escalationNotes;
 }
-SELECT Id, Name, Case__c, Notes__c, CreatedDate
-FROM MICC_Notes__c
-ORDER BY CreatedDate DESC
-LIMIT 10
