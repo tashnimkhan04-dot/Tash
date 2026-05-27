@@ -1,40 +1,33 @@
-Below are the exact files/components you need and where to put each one.
-
-File 1: Apex Class
-
-Create this in:
-
-Developer Console → File → New → Apex Class
-Class name:
-
-AE_CreateFormLauncherController
-Code:
+Developer Console → AE_CreateFormLauncherController
+Replace the class with this:
 
 public with sharing class AE_CreateFormLauncherController {
 
     @AuraEnabled(cacheable=true)
-    public static String getSourceId(Id recordId) {
-        New_Potential_Adverse_Event__c ae = [
-            SELECT Source_Id__c
+    public static String getSourceId(Id caseId) {
+        List<New_Potential_Adverse_Event__c> paeList = [
+            SELECT Id, Source_Id__c
             FROM New_Potential_Adverse_Event__c
-            WHERE Id = :recordId
+            WHERE Case_PAE__c = :caseId
+            ORDER BY CreatedDate DESC
             LIMIT 1
         ];
 
-        return ae.Source_Id__c;
+        if (!paeList.isEmpty() && String.isNotBlank(paeList[0].Source_Id__c)) {
+            return paeList[0].Source_Id__c;
+        }
+
+        return 'AE Form';
     }
 }
-If your Case field API name is not Source_Id__c, replace it with the correct field.
+Save.
 
-File 2: Aura Component
+Step 2: Update Aura Component
 
-Create this in:
+Go to:
 
-Developer Console → File → New → Lightning Component
-Component name:
-
-AE_CreateFormLauncher
-Code:
+Developer Console → AE_CreateFormLauncher.cmp
+Use this:
 
 <aura:component controller="AE_CreateFormLauncherController"
                 implements="force:hasRecordId,force:lightningQuickActionWithoutHeader"
@@ -44,12 +37,14 @@ Code:
     <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
 
 </aura:component>
-File 3: Aura Controller JS
+Save.
+
+Step 3: Update Aura Controller JS
 
 Open:
 
 AE_CreateFormLauncherController.js
-Code:
+Use this:
 
 ({
     doInit : function(component, event, helper) {
@@ -93,7 +88,9 @@ Code:
         $A.enqueueAction(action);
     }
 })
-Step 4: Create Lightning Action
+Save.
+
+Step 4: Create Action On Case
 
 Go to:
 
@@ -101,41 +98,62 @@ Setup → Object Manager → Case → Buttons, Links, and Actions
 Click:
 
 New Action
-Select:
+Set:
 
 Action Type: Lightning Component
-Lightning Component: c:AE_CreateFormLauncher
-Label: same as your existing button name
-Example label:
-
-Create AE Form
+Lightning Component: AE_CreateFormLauncher
+Label: same as existing button
 Save.
 
-Step 5: Add Action To Layout
+Step 5: Add Action To Case Page Layout
 
 Go to:
 
 Object Manager → Case → Page Layouts
-Open your page layout.
+Open your Case layout.
+
+Click:
+
+Mobile & Lightning Actions
+Drag your new action into:
+
+Salesforce Mobile and Lightning Experience Actions
+Save.
+
+Step 6: Remove Wrong Action From New PAE Layout
 
 Go to:
 
-Salesforce Mobile and Lightning Experience Actions
-Drag this action:
+Object Manager → New Potential Adverse Event → Page Layouts
+Open:
 
-Create AE Form
-into the action bar.
+New Potential Adverse Event Layout
+Click:
 
+Mobile & Lightning Actions
+Remove the wrong action:
+
+New New Potential Adverse Event
 Save.
 
-Step 6: Keep Existing Classic Button
+Then delete it from:
 
-Do not delete your old Classic button.
+New Potential Adverse Event → Buttons, Links, and Actions
+Step 7: Test
 
-Classic will use:
+Open a Case record in Lightning.
 
-Visualforce button + sforce.console.setTabTitle(sourceId)
-Lightning will use:
+Click the action.
 
-Aura action + workspaceAPI.setTabLabel(sourceId)
-Users can see the same button label in both places.
+Expected:
+
+VF page opens
+Tab label becomes Source_Id__c from related New PAE
+If it shows AE Form, then no related New PAE was found where:
+
+Case_PAE__c = current Case Id
+
+
+
+
+3:10 PM
