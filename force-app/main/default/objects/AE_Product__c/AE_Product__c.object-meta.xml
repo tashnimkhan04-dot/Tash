@@ -19,42 +19,10 @@
         var vfUrl = "/apex/CCMIC_AE_CreateForm";
 
         if (caseId) {
-            vfUrl = vfUrl + "?caseId=" + caseId;
+            vfUrl += "?caseId=" + caseId;
         }
 
-        var action = component.get("c.getSourceId");
-        action.setParams({
-            caseId: caseId
-        });
-
-        action.setCallback(this, function(response) {
-            var sourceId = "New PAE";
-
-            if (response.getState() === "SUCCESS" && response.getReturnValue()) {
-                sourceId = response.getReturnValue();
-            }
-
-            var workspaceAPI = component.find("workspace");
-
-            workspaceAPI.isConsoleNavigation().then(function(isConsole) {
-                if (isConsole) {
-                    workspaceAPI.getFocusedTabInfo().then(function(tabInfo) {
-                        workspaceAPI.setTabLabel({
-                            tabId: tabInfo.tabId,
-                            label: sourceId
-                        }).then(function() {
-                            window.location.replace(vfUrl);
-                        });
-                    });
-                } else {
-                    window.location.replace(vfUrl);
-                }
-            }).catch(function(error) {
-                window.location.replace(vfUrl);
-            });
-        });
-
-        $A.enqueueAction(action);
+        window.location.replace(vfUrl);
     }
 })
 Aura component should be:
