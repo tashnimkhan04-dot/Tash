@@ -16,10 +16,10 @@
             caseId = decodedContext.attributes.recordId;
         }
 
-        if (!caseId) {
-            console.log("Case Id not found from inContextOfRef");
-            window.location.href = "/apex/CCMIC_AE_CreateForm";
-            return;
+        var vfUrl = "/apex/CCMIC_AE_CreateForm";
+
+        if (caseId) {
+            vfUrl = vfUrl + "?caseId=" + caseId;
         }
 
         var action = component.get("c.getSourceId");
@@ -34,35 +34,23 @@
                 sourceId = response.getReturnValue();
             }
 
-            var vfUrl = "/apex/CCMIC_AE_CreateForm?caseId=" + caseId;
             var workspaceAPI = component.find("workspace");
 
             workspaceAPI.isConsoleNavigation().then(function(isConsole) {
                 if (isConsole) {
                     workspaceAPI.getFocusedTabInfo().then(function(tabInfo) {
-                        var parentTabId = tabInfo.isSubtab
-                            ? tabInfo.parentTabId
-                            : tabInfo.tabId;
-
-                        workspaceAPI.openSubtab({
-                            parentTabId: parentTabId,
-                            url: vfUrl,
-                            focus: true
-                        }).then(function(subtabId) {
-                            window.setTimeout(function() {
-                                workspaceAPI.setTabLabel({
-                                    tabId: subtabId,
-                                    label: sourceId
-                                });
-                            }, 1000);
+                        workspaceAPI.setTabLabel({
+                            tabId: tabInfo.tabId,
+                            label: sourceId
+                        }).then(function() {
+                            window.location.replace(vfUrl);
                         });
                     });
                 } else {
-                    window.location.href = vfUrl;
+                    window.location.replace(vfUrl);
                 }
             }).catch(function(error) {
-                console.log("Workspace API error", error);
-                window.location.href = vfUrl;
+                window.location.replace(vfUrl);
             });
         });
 
