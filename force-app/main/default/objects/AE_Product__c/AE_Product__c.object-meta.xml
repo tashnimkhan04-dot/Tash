@@ -30,7 +30,7 @@ Developer Console → AE_CreateFormLauncher.cmp
 Use this:
 
 <aura:component controller="AE_CreateFormLauncherController"
-                implements="force:hasRecordId,force:lightningQuickActionWithoutHeader"
+                implements="lightning:actionOverride,lightning:isUrlAddressable"
                 access="global">
 
     <lightning:workspaceAPI aura:id="workspace"/>
