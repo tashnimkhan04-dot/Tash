@@ -1,5 +1,78 @@
-Developer Console → AE_CreateFormLauncherController
-Replace the class with this:
+({
+    doInit : function(component, event, helper) {
+        var pageRef = component.get("v.pageReference");
+        var caseId;
+
+        if (pageRef && pageRef.state && pageRef.state.inContextOfRef) {
+            var context = pageRef.state.inContextOfRef;
+
+            if (context.startsWith("1.")) {
+                context = context.substring(2);
+            }
+
+            context = context.replace(/-/g, "+").replace(/_/g, "/");
+
+            var decodedContext = JSON.parse(window.atob(context));
+            caseId = decodedContext.attributes.recordId;
+        }
+
+        if (!caseId) {
+            console.log("Case Id not found from inContextOfRef");
+            window.location.href = "/apex/CCMIC_AE_CreateForm";
+            return;
+        }
+
+        var action = component.get("c.getSourceId");
+        action.setParams({
+            caseId: caseId
+        });
+
+        action.setCallback(this, function(response) {
+            var sourceId = "New PAE";
+
+            if (response.getState() === "SUCCESS" && response.getReturnValue()) {
+                sourceId = response.getReturnValue();
+            }
+
+            var vfUrl = "/apex/CCMIC_AE_CreateForm?caseId=" + caseId;
+            var workspaceAPI = component.find("workspace");
+
+            workspaceAPI.isConsoleNavigation().then(function(isConsole) {
+                if (isConsole) {
+                    workspaceAPI.openTab({
+                        url: vfUrl,
+                        focus: true
+                    }).then(function(tabId) {
+                        window.setTimeout(function() {
+                            workspaceAPI.setTabLabel({
+                                tabId: tabId,
+                                label: sourceId
+                            });
+                        }, 1000);
+                    });
+                } else {
+                    window.location.href = vfUrl;
+                }
+            }).catch(function(error) {
+                window.location.href = vfUrl;
+            });
+        });
+
+        $A.enqueueAction(action);
+    }
+})
+Aura component should be:
+
+<aura:component controller="AE_CreateFormLauncherController"
+                implements="lightning:actionOverride,lightning:isUrlAddressable"
+                access="global">
+
+    <lightning:workspaceAPI aura:id="workspace"/>
+    <aura:attribute name="pageReference" type="Object"/>
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+
+</aura:component>
+Apex should stay:
 
 public with sharing class AE_CreateFormLauncherController {
 
@@ -17,167 +90,6 @@ public with sharing class AE_CreateFormLauncherController {
             return paeList[0].Source_Id__c;
         }
 
-        return 'AE Form';
-    }
-}
-Save.
-
-Step 2: Update Aura Component
-
-Go to:
-
-Developer Console → AE_CreateFormLauncher.cmp
-Use this:
-
-<aura:component controller="AE_CreateFormLauncherController"
-                implements="lightning:actionOverride,lightning:isUrlAddressable"
-                access="global">
-
-    <lightning:workspaceAPI aura:id="workspace"/>
-    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
-
-</aura:component>
-Save.
-
-Step 3: Update Aura Controller JS
-
-Open:
-
-AE_CreateFormLauncherController.js
-Use this:
-
-({
-    doInit : function(component, event, helper) {
-        var caseId = component.get("v.recordId");
-
-        var action = component.get("c.getSourceId");
-        action.setParams({
-            caseId: caseId
-        });
-
-        action.setCallback(this, function(response) {
-            var sourceId = "AE Form";
-
-            if (response.getState() === "SUCCESS" && response.getReturnValue()) {
-                sourceId = response.getReturnValue();
-            }
-
-            var vfUrl = "/apex/CCMIC_AE_CreateForm?caseId=" + caseId;
-
-            var workspaceAPI = component.find("workspace");
-
-            workspaceAPI.isConsoleNavigation().then(function(isConsole) {
-                if (isConsole) {
-                    workspaceAPI.openTab({
-                        url: vfUrl,
-                        focus: true
-                    }).then(function(tabId) {
-                        workspaceAPI.setTabLabel({
-                            tabId: tabId,
-                            label: sourceId
-                        });
-                    });
-                } else {
-                    window.location.href = vfUrl;
-                }
-            }).catch(function(error) {
-                window.location.href = vfUrl;
-            });
-        });
-
-        $A.enqueueAction(action);
-    }
-})
-Save.
-
-Step 4: Create Action On Case
-
-Go to:
-
-Setup → Object Manager → Case → Buttons, Links, and Actions
-Click:
-
-New Action
-Set:
-
-Action Type: Lightning Component
-Lightning Component: AE_CreateFormLauncher
-Label: same as existing button
-Save.
-
-Step 5: Add Action To Case Page Layout
-
-Go to:
-
-Object Manager → Case → Page Layouts
-Open your Case layout.
-
-Click:
-
-Mobile & Lightning Actions
-Drag your new action into:
-
-Salesforce Mobile and Lightning Experience Actions
-Save.
-
-Step 6: Remove Wrong Action From New PAE Layout
-
-Go to:
-
-Object Manager → New Potential Adverse Event → Page Layouts
-Open:
-
-New Potential Adverse Event Layout
-Click:
-
-Mobile & Lightning Actions
-Remove the wrong action:
-
-New New Potential Adverse Event
-Save.
-
-Then delete it from:
-
-New Potential Adverse Event → Buttons, Links, and Actions
-Step 7: Test
-
-Open a Case record in Lightning.
-
-Click the action.
-
-Expected:
-
-VF page opens
-Tab label becomes Source_Id__c from related New PAE
-If it shows AE Form, then no related New PAE was found where:
-
-Case_PAE__c = current Case Id
-
-
-
-function setConsoleTabTitle() {
-    try {
-        var sourceId = '{!JSENCODE(sourceId)}';
-        
-        // Classic Console
-        if (typeof sforce !== 'undefined' && sforce.console) {
-            sforce.console.isInConsole(function(result) {
-                if (result.success && result.inConsole) {
-                    sforce.console.getEnclosingTabId(function(res) {
-                        if (res.success && res.id) {
-                            sforce.console.setTabTitle(sourceId, function(){}, res.id);
-                        }
-                    });
-                }
-            });
-        }
-        
-        // Lightning — update document title
-        if (sourceId && sourceId !== '') {
-            document.title = sourceId;
-        }
-        
-    } catch (e) {
-        if (window.console) { console.log(e); }
+        return 'New PAE';
     }
 }
