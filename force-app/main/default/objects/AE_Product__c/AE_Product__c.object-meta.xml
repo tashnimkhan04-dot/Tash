@@ -13,15 +13,15 @@ Code:
 public with sharing class AE_CreateFormLauncherController {
 
     @AuraEnabled(cacheable=true)
-    public static String getSourceId(Id caseId) {
-        Case c = [
+    public static String getSourceId(Id recordId) {
+        New_Potential_Adverse_Event__c ae = [
             SELECT Source_Id__c
-            FROM Case
-            WHERE Id = :caseId
+            FROM New_Potential_Adverse_Event__c
+            WHERE Id = :recordId
             LIMIT 1
         ];
 
-        return c.Source_Id__c;
+        return ae.Source_Id__c;
     }
 }
 If your Case field API name is not Source_Id__c, replace it with the correct field.
