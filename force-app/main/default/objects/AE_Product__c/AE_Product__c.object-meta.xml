@@ -69,18 +69,29 @@
 
 Inside CCMIC_AE_CreateForm VF page, add this function:
 
-function notifyLightningTabTitle() {
+function setConsoleTabTitle() {
     try {
         var sourceId = "{!JSENCODE(sourceId)}";
 
-        if (sourceId && sourceId.trim() !== "" && window.parent) {
-            window.parent.postMessage({
-                type: "AE_SET_TAB_TITLE",
-                sourceId: sourceId
-            }, "*");
+        if (!sourceId || sourceId.trim() === "") {
+            return;
+        }
+
+        document.title = sourceId;
+
+        if (window.sforce && sforce.console) {
+            sforce.console.getEnclosingTabId(function(result) {
+                if (result.success && result.id) {
+                    sforce.console.setTabTitle(sourceId, result.id);
+                } else {
+                    sforce.console.setTabTitle(sourceId);
+                }
+            });
         }
     } catch (e) {
-        console.log("Lightning tab title error: " + e);
+        if (window.console) {
+            console.log("Error setting tab title: " + e);
+        }
     }
 }
 Then call it inside your existing window.onload:
@@ -90,11 +101,7 @@ window.onload = function() {
     setInterval(updateTime, 1000);
 
     setConsoleTabTitle();
-    notifyLightningTabTitle();
-
     setTimeout(setConsoleTabTitle, 1000);
-    setTimeout(notifyLightningTabTitle, 1000);
-
     setTimeout(setConsoleTabTitle, 2500);
-    setTimeout(notifyLightningTabTitle, 2500);
+    setTimeout(setConsoleTabTitle, 5000);
 };
