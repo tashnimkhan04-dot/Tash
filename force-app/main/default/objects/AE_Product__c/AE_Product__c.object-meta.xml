@@ -1,3 +1,18 @@
+<aura:component implements="lightning:actionOverride,lightning:isUrlAddressable"
+                access="global">
+
+    <lightning:workspaceAPI aura:id="workspace"/>
+    <aura:attribute name="pageReference" type="Object"/>
+    <aura:attribute name="vfUrl" type="String"/>
+
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+
+    <iframe src="{!v.vfUrl}"
+            style="width:100%; height:100vh; border:0;"
+            frameborder="0"/>
+</aura:component>
+2. Replace Aura JS Controller
+
 ({
     doInit : function(component, event, helper) {
         var pageRef = component.get("v.pageReference");
@@ -19,41 +34,67 @@
         var vfUrl = "/apex/CCMIC_AE_CreateForm";
 
         if (caseId) {
-            vfUrl += "?caseId=" + caseId;
+            vfUrl += "?caseId=" + encodeURIComponent(caseId);
         }
 
-        window.location.replace(vfUrl);
+        component.set("v.vfUrl", vfUrl);
+
+        window.addEventListener("message", $A.getCallback(function(event) {
+            if (!event.data || event.data.type !== "AE_SET_TAB_TITLE") {
+                return;
+            }
+
+            var sourceId = event.data.sourceId;
+
+            if (!sourceId) {
+                return;
+            }
+
+            var workspaceAPI = component.find("workspace");
+
+            workspaceAPI.isConsoleNavigation().then(function(isConsole) {
+                if (isConsole) {
+                    workspaceAPI.getFocusedTabInfo().then(function(tabInfo) {
+                        workspaceAPI.setTabLabel({
+                            tabId: tabInfo.tabId,
+                            label: sourceId
+                        });
+                    });
+                }
+            });
+        }), false);
     }
 })
-Aura component should be:
+3. Add This In VF Page Script
 
-<aura:component controller="AE_CreateFormLauncherController"
-                implements="lightning:actionOverride,lightning:isUrlAddressable"
-                access="global">
+Inside CCMIC_AE_CreateForm VF page, add this function:
 
-    <lightning:workspaceAPI aura:id="workspace"/>
-    <aura:attribute name="pageReference" type="Object"/>
-    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+function notifyLightningTabTitle() {
+    try {
+        var sourceId = "{!JSENCODE(sourceId)}";
 
-</aura:component>
-Apex should stay:
-
-public with sharing class AE_CreateFormLauncherController {
-
-    @AuraEnabled(cacheable=true)
-    public static String getSourceId(Id caseId) {
-        List<New_Potential_Adverse_Event__c> paeList = [
-            SELECT Id, Source_Id__c
-            FROM New_Potential_Adverse_Event__c
-            WHERE Case_PAE__c = :caseId
-            ORDER BY CreatedDate DESC
-            LIMIT 1
-        ];
-
-        if (!paeList.isEmpty() && String.isNotBlank(paeList[0].Source_Id__c)) {
-            return paeList[0].Source_Id__c;
+        if (sourceId && sourceId.trim() !== "" && window.parent) {
+            window.parent.postMessage({
+                type: "AE_SET_TAB_TITLE",
+                sourceId: sourceId
+            }, "*");
         }
-
-        return 'New PAE';
+    } catch (e) {
+        console.log("Lightning tab title error: " + e);
     }
 }
+Then call it inside your existing window.onload:
+
+window.onload = function() {
+    updateTime();
+    setInterval(updateTime, 1000);
+
+    setConsoleTabTitle();
+    notifyLightningTabTitle();
+
+    setTimeout(setConsoleTabTitle, 1000);
+    setTimeout(notifyLightningTabTitle, 1000);
+
+    setTimeout(setConsoleTabTitle, 2500);
+    setTimeout(notifyLightningTabTitle, 2500);
+};
