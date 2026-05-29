@@ -69,29 +69,25 @@
 
 Inside CCMIC_AE_CreateForm VF page, add this function:
 
-function setConsoleTabTitle() {
+function setLightningTabTitle() {
     try {
-        var sourceId = "{!JSENCODE(sourceId)}";
-
-        if (!sourceId || sourceId.trim() === "") {
-            return;
-        }
-
+        var el = document.getElementById('hdnSourceId');
+        if (!el) return;
+        var sourceId = el.innerText.trim();
+        if (!sourceId || sourceId === '') return;
+        
+        // Set document title — Lightning Console picks this up
         document.title = sourceId;
-
-        if (window.sforce && sforce.console) {
-            sforce.console.getEnclosingTabId(function(result) {
-                if (result.success && result.id) {
-                    sforce.console.setTabTitle(sourceId, result.id);
-                } else {
-                    sforce.console.setTabTitle(sourceId);
-                }
-            });
+        
+        // Post to parent for Aura listener if needed
+        if (window.parent) {
+            window.parent.postMessage({
+                type: 'AE_SET_TAB_TITLE',
+                sourceId: sourceId
+            }, '*');
         }
-    } catch (e) {
-        if (window.console) {
-            console.log("Error setting tab title: " + e);
-        }
+    } catch(e) {
+        console.log(e);
     }
 }
 Then call it inside your existing window.onload:
@@ -104,4 +100,7 @@ window.onload = function() {
     setTimeout(setConsoleTabTitle, 1000);
     setTimeout(setConsoleTabTitle, 2500);
     setTimeout(setConsoleTabTitle, 5000);
+    setTimeout(setLightningTabTitle, 1000);
+setTimeout(setLightningTabTitle, 2500);
+setTimeout(setLightningTabTitle, 5000);
 };
