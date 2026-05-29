@@ -113,23 +113,30 @@ Open AE_CreateFormLauncherHelper.js and use:
 
 In CCMIC_AE_CreateForm, add this script function:
 
-function notifyLightningTabTitle() {
-    try {
-        var sourceId = "{!JSENCODE(sourceId)}";
-
-        if (sourceId && sourceId.trim() !== "" && window.parent) {
-            window.parent.postMessage({
-                type: "AE_SET_TAB_TITLE",
-                sourceId: sourceId
-            }, "*");
-        }
-    } catch (e) {
-        console.log("Lightning tab title error: " + e);
-    }
-}
-Then in your existing window.onload, add:
-
-notifyLightningTabTitle();
-setTimeout(notifyLightningTabTitle, 1000);
-setTimeout(notifyLightningTabTitle, 2500);
-setTimeout(notifyLightningTabTitle, 5000);
+<!-- 1. The ONLY library you need for titles -->
+    2 <script src="/support/console/60.0/integration.js" type="text/javascript"></script>
+    3
+    4 <script type="text/javascript">
+    5     function updateUnifiedTabTitle() {
+    6         var sourceIdValue = "{!JSENCODE(sourceId)}";
+    7         
+    8         // This check works for BOTH Classic and Lightning Consoles
+    9         if (typeof sforce !== 'undefined' && sforce.console && sforce.console.isInConsole()) {
+   10             sforce.console.getEnclosingTabId(function(result) {
+   11                 if (result.id) {
+   12                     // This command works in both Classic and Lightning
+   13                     sforce.console.setTabTitle(sourceIdValue, result.id);
+   14                 }
+   15             });
+   16         }
+   17     }
+   18
+   19     // THE EXECUTION PLAN
+   20     // We run it multiple times to ensure we beat the "Button Name" in Lightning
+   21     // while keeping it stable in Classic.
+   22     window.addEventListener('load', function() {
+   23         updateUnifiedTabTitle();      // Runs immediately
+   24         setTimeout(updateUnifiedTabTitle, 1000); // Wait 1 sec
+   25         setTimeout(updateUnifiedTabTitle, 3000); // Wait 3 sec
+   26         setTimeout(updateUnifiedTabTitle, 5000); // Wait 5 sec (Final safety)
+   27     });
