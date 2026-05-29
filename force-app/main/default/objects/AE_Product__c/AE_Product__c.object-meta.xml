@@ -140,3 +140,18 @@ In CCMIC_AE_CreateForm, add this script function:
    25         setTimeout(updateUnifiedTabTitle, 3000); // Wait 3 sec
    26         setTimeout(updateUnifiedTabTitle, 5000); // Wait 5 sec (Final safety)
    27     });
+          this.sourceId = ApexPages.currentPage().getParameters().get('sourceId');
+    7
+    8         if (String.isBlank(this.sourceId)) {
+    9             String caseIdParam = ApexPages.currentPage().getParameters().get('caseId');
+   10             if (String.isNotBlank(caseIdParam)) {
+   11                 try {
+   12                     List<Case> caseList = [SELECT MICC_CaseNumber__c FROM Case WHERE Id = :caseIdParam LIMIT 1];
+   13                     if (!caseList.isEmpty()) {
+   14                         this.sourceId = caseList[0].MICC_CaseNumber__c;
+   15                     }
+   16                 } catch(Exception e) {
+   17                     System.debug('Case Query Error: ' + e.getMessage());
+   18                 }
+   19             }
+   20         }
