@@ -104,3 +104,4 @@ window.onload = function() {
 setTimeout(setLightningTabTitle, 2500);
 setTimeout(setLightningTabTitle, 5000);
 };
+document.getElementById('hdnSourceId').innerText
