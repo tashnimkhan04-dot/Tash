@@ -111,8 +111,6 @@ Open AE_CreateFormLauncherHelper.js and use:
 })
 4. Add To VF Page
 
-In CCMIC_AE_CreateForm, add this script function:
-
 <script src="/support/console/60.0/integration.js" type="text/javascript"></script>
 
 <!-- This logic goes at the VERY BOTTOM of your page -->
@@ -156,44 +154,4 @@ In CCMIC_AE_CreateForm, add this script function:
         // Start the override sequence as soon as the page loads
         window.addEventListener("load", ultimateTitleOverride);
     })();
-</script>s here ...
-   25 }
-
-  2. The Visualforce Fix (Add to your Page)
-  Make sure your <apex:page> tag has title="{!sourceId}". 
-  Then, paste this <script> block at the very bottom of your page, right before the closing </apex:page> tag.
-
-    1 <!-- ... rest of your Visualforce page content above ... -->
-    2
-    3 <!-- --- PASTE THIS BLOCK AT THE BOTTOM OF THE PAGE --- -->
-    4 <!-- Load the Console Integration Library -->
-    5 <script src="/support/console/60.0/integration.js" type="text/javascript"></script>
-    6
-    7 <script type="text/javascript">
-    8     function forceConsoleTabTitle() {
-    9         var newTitle = "{!JSENCODE(sourceId)}";
-   10         
-   11         // If sourceId is empty, do nothing
-   12         if (!newTitle || newTitle.trim() === '') return;
-   13
-   14         // Check if we are inside the Salesforce Console
-   15         if (typeof sforce !== 'undefined' && sforce.console && sforce.console.isInConsole()) {
-   16             sforce.console.getEnclosingTabId(function(result) {
-   17                 if (result.id) {
-   18                     // Force the tab to rename to the sourceId
-   19                     sforce.console.setTabTitle(newTitle, result.id);
-   20                 }
-   21             });
-   22         }
-   23     }
-   24
-   25     // Run immediately, then again at 1s and 3s to overwrite the Lightning "Button Name"
-   26     var previousOnload = window.onload;
-   27     window.onload = function() {
-   28         if (previousOnload) { previousOnload(); }
-   29         forceConsoleTabTitle();
-   30         setTimeout(forceConsoleTabTitle, 1000);
-   31         setTimeout(forceConsoleTabTitle, 3000);
-   32     };
-   33 </script>
-   34 <!-- --- END PASTE BLOCK --- -->
+</script>
