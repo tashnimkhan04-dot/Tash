@@ -113,32 +113,50 @@ Open AE_CreateFormLauncherHelper.js and use:
 
 In CCMIC_AE_CreateForm, add this script function:
 
-<!-- 1. The ONLY library you need for titles -->
-    2 <script src="/support/console/60.0/integration.js" type="text/javascript"></script>
-    3
-    4 public String sourceId { get; set; }
-    3
-    4 public AECaseController() {
-    5     // --- PASTE THIS BLOCK AT THE START OF THE CONSTRUCTOR ---
-    6     this.sourceId = ApexPages.currentPage().getParameters().get('sourceId');
-    7
-    8     if (String.isBlank(this.sourceId)) {
-    9         String caseIdParam = ApexPages.currentPage().getParameters().get('caseId');
-   10         if (String.isNotBlank(caseIdParam)) {
-   11             try {
-   12                 // Change MICC_CaseNumber__c to MICC_Inquiry_For__c if you want the "I-..." number instead
-   13                 List<Case> caseList = [SELECT MICC_CaseNumber__c FROM Case WHERE Id = :caseIdParam LIMIT 1];
-   14                 if (!caseList.isEmpty()) {
-   15                     this.sourceId = caseList[0].MICC_CaseNumber__c;
-   16                 }
-   17             } catch(Exception e) {
-   18                 System.debug('Tab Title Error: ' + e.getMessage());
-   19             }
-   20         }
-   21     }
-   22     // --- END PASTE BLOCK ---
-   23
-   24     // ... your other existing constructor code remains here ...
+<script src="/support/console/60.0/integration.js" type="text/javascript"></script>
+
+<!-- This logic goes at the VERY BOTTOM of your page -->
+<script type="text/javascript">
+    (function() {
+        var iterations = 0;
+        var maxIterations = 40; // This will try for 10 seconds (40 * 250ms)
+        var sourceIdValue = "{!JSENCODE(sourceId)}";
+
+        function ultimateTitleOverride() {
+            // If the controller didn't provide a value, we can't set it.
+            if (!sourceIdValue || sourceIdValue.trim() === "") {
+                return;
+            }
+
+            if (typeof sforce !== "undefined" && sforce.console && sforce.console.isInConsole()) {
+                sforce.console.getEnclosingTabId(function(result) {
+                    if (result.id) {
+                        // FORCE 1: Set the Title
+                        sforce.console.setTabTitle(sourceIdValue, result.id);
+
+                        // FORCE 2: Set the Icon (Standard Case Icon)
+                        // This refresh often "un-sticks" the button name in Lightning
+                        sforce.console.setTabIcon("standard:case", result.id);
+
+                        console.log("Lightning Tab Update: Attempt " + iterations + " for " + sourceIdValue);
+                    }
+                });
+            }
+
+            // Also update browser title for non-console users
+            document.title = sourceIdValue;
+
+            iterations++;
+            if (iterations < maxIterations) {
+                // Try again in 250ms
+                setTimeout(ultimateTitleOverride, 250);
+            }
+        }
+
+        // Start the override sequence as soon as the page loads
+        window.addEventListener("load", ultimateTitleOverride);
+    })();
+</script>s here ...
    25 }
 
   2. The Visualforce Fix (Add to your Page)
