@@ -1,7 +1,12 @@
+1. Aura Component
+
+Open AE_CreateFormLauncher.cmp and use this:
+
 <aura:component implements="lightning:actionOverride,lightning:isUrlAddressable"
                 access="global">
 
     <lightning:workspaceAPI aura:id="workspace"/>
+
     <aura:attribute name="pageReference" type="Object"/>
     <aura:attribute name="vfUrl" type="String"/>
 
@@ -11,15 +16,50 @@
             style="width:100%; height:100vh; border:0;"
             frameborder="0"/>
 </aura:component>
-2. Replace Aura JS Controller
+2. Aura JS Controller
+
+Open AE_CreateFormLauncherController.js and use:
 
 ({
     doInit : function(component, event, helper) {
-        var pageRef = component.get("v.pageReference");
-        var caseId;
+        helper.registerTabTitleListener(component);
 
-        if (pageRef && pageRef.state && pageRef.state.inContextOfRef) {
-            var context = pageRef.state.inContextOfRef;
+        var pageRef = component.get("v.pageReference");
+        var state = pageRef && pageRef.state ? pageRef.state : {};
+        var caseId = helper.getCaseIdFromContext(state);
+
+        var vfUrl = "/apex/CCMIC_AE_CreateForm";
+        var params = [];
+
+        Object.keys(state).forEach(function(key) {
+            if (state[key]) {
+                params.push(encodeURIComponent(key) + "=" + encodeURIComponent(state[key]));
+            }
+        });
+
+        if (caseId && !state.caseId) {
+            params.push("caseId=" + encodeURIComponent(caseId));
+        }
+
+        if (params.length > 0) {
+            vfUrl += "?" + params.join("&");
+        }
+
+        component.set("v.vfUrl", vfUrl);
+    }
+})
+3. Aura Helper
+
+Open AE_CreateFormLauncherHelper.js and use:
+
+({
+    getCaseIdFromContext : function(state) {
+        if (state.caseId) {
+            return state.caseId;
+        }
+
+        if (state.inContextOfRef) {
+            var context = state.inContextOfRef;
 
             if (context.startsWith("1.")) {
                 context = context.substring(2);
@@ -27,18 +67,22 @@
 
             context = context.replace(/-/g, "+").replace(/_/g, "/");
 
-            var decodedContext = JSON.parse(window.atob(context));
-            caseId = decodedContext.attributes.recordId;
+            while (context.length % 4) {
+                context += "=";
+            }
+
+            try {
+                var decodedContext = JSON.parse(window.atob(context));
+                return decodedContext.attributes.recordId;
+            } catch (e) {
+                console.log("Context decode error", e);
+            }
         }
 
-        var vfUrl = "/apex/CCMIC_AE_CreateForm";
+        return null;
+    },
 
-        if (caseId) {
-            vfUrl += "?caseId=" + encodeURIComponent(caseId);
-        }
-
-        component.set("v.vfUrl", vfUrl);
-
+    registerTabTitleListener : function(component) {
         window.addEventListener("message", $A.getCallback(function(event) {
             if (!event.data || event.data.type !== "AE_SET_TAB_TITLE") {
                 return;
@@ -65,43 +109,27 @@
         }), false);
     }
 })
-3. Add This In VF Page Script
+4. Add To VF Page
 
-Inside CCMIC_AE_CreateForm VF page, add this function:
+In CCMIC_AE_CreateForm, add this script function:
 
-function setLightningTabTitle() {
+function notifyLightningTabTitle() {
     try {
-        var el = document.getElementById('hdnSourceId');
-        if (!el) return;
-        var sourceId = el.innerText.trim();
-        if (!sourceId || sourceId === '') return;
-        
-        // Set document title — Lightning Console picks this up
-        document.title = sourceId;
-        
-        // Post to parent for Aura listener if needed
-        if (window.parent) {
+        var sourceId = "{!JSENCODE(sourceId)}";
+
+        if (sourceId && sourceId.trim() !== "" && window.parent) {
             window.parent.postMessage({
-                type: 'AE_SET_TAB_TITLE',
+                type: "AE_SET_TAB_TITLE",
                 sourceId: sourceId
-            }, '*');
+            }, "*");
         }
-    } catch(e) {
-        console.log(e);
+    } catch (e) {
+        console.log("Lightning tab title error: " + e);
     }
 }
-Then call it inside your existing window.onload:
+Then in your existing window.onload, add:
 
-window.onload = function() {
-    updateTime();
-    setInterval(updateTime, 1000);
-
-    setConsoleTabTitle();
-    setTimeout(setConsoleTabTitle, 1000);
-    setTimeout(setConsoleTabTitle, 2500);
-    setTimeout(setConsoleTabTitle, 5000);
-    setTimeout(setLightningTabTitle, 1000);
-setTimeout(setLightningTabTitle, 2500);
-setTimeout(setLightningTabTitle, 5000);
-};
-document.getElementById('hdnSourceId').innerText
+notifyLightningTabTitle();
+setTimeout(notifyLightningTabTitle, 1000);
+setTimeout(notifyLightningTabTitle, 2500);
+setTimeout(notifyLightningTabTitle, 5000);
