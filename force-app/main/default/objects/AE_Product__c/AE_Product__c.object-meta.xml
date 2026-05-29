@@ -116,42 +116,66 @@ In CCMIC_AE_CreateForm, add this script function:
 <!-- 1. The ONLY library you need for titles -->
     2 <script src="/support/console/60.0/integration.js" type="text/javascript"></script>
     3
-    4 <script type="text/javascript">
-    5     function updateUnifiedTabTitle() {
-    6         var sourceIdValue = "{!JSENCODE(sourceId)}";
-    7         
-    8         // This check works for BOTH Classic and Lightning Consoles
-    9         if (typeof sforce !== 'undefined' && sforce.console && sforce.console.isInConsole()) {
-   10             sforce.console.getEnclosingTabId(function(result) {
-   11                 if (result.id) {
-   12                     // This command works in both Classic and Lightning
-   13                     sforce.console.setTabTitle(sourceIdValue, result.id);
-   14                 }
-   15             });
-   16         }
-   17     }
-   18
-   19     // THE EXECUTION PLAN
-   20     // We run it multiple times to ensure we beat the "Button Name" in Lightning
-   21     // while keeping it stable in Classic.
-   22     window.addEventListener('load', function() {
-   23         updateUnifiedTabTitle();      // Runs immediately
-   24         setTimeout(updateUnifiedTabTitle, 1000); // Wait 1 sec
-   25         setTimeout(updateUnifiedTabTitle, 3000); // Wait 3 sec
-   26         setTimeout(updateUnifiedTabTitle, 5000); // Wait 5 sec (Final safety)
-   27     });
-          this.sourceId = ApexPages.currentPage().getParameters().get('sourceId');
+    4 public String sourceId { get; set; }
+    3
+    4 public AECaseController() {
+    5     // --- PASTE THIS BLOCK AT THE START OF THE CONSTRUCTOR ---
+    6     this.sourceId = ApexPages.currentPage().getParameters().get('sourceId');
     7
-    8         if (String.isBlank(this.sourceId)) {
-    9             String caseIdParam = ApexPages.currentPage().getParameters().get('caseId');
-   10             if (String.isNotBlank(caseIdParam)) {
-   11                 try {
-   12                     List<Case> caseList = [SELECT MICC_CaseNumber__c FROM Case WHERE Id = :caseIdParam LIMIT 1];
-   13                     if (!caseList.isEmpty()) {
-   14                         this.sourceId = caseList[0].MICC_CaseNumber__c;
-   15                     }
-   16                 } catch(Exception e) {
-   17                     System.debug('Case Query Error: ' + e.getMessage());
-   18                 }
+    8     if (String.isBlank(this.sourceId)) {
+    9         String caseIdParam = ApexPages.currentPage().getParameters().get('caseId');
+   10         if (String.isNotBlank(caseIdParam)) {
+   11             try {
+   12                 // Change MICC_CaseNumber__c to MICC_Inquiry_For__c if you want the "I-..." number instead
+   13                 List<Case> caseList = [SELECT MICC_CaseNumber__c FROM Case WHERE Id = :caseIdParam LIMIT 1];
+   14                 if (!caseList.isEmpty()) {
+   15                     this.sourceId = caseList[0].MICC_CaseNumber__c;
+   16                 }
+   17             } catch(Exception e) {
+   18                 System.debug('Tab Title Error: ' + e.getMessage());
    19             }
    20         }
+   21     }
+   22     // --- END PASTE BLOCK ---
+   23
+   24     // ... your other existing constructor code remains here ...
+   25 }
+
+  2. The Visualforce Fix (Add to your Page)
+  Make sure your <apex:page> tag has title="{!sourceId}". 
+  Then, paste this <script> block at the very bottom of your page, right before the closing </apex:page> tag.
+
+    1 <!-- ... rest of your Visualforce page content above ... -->
+    2
+    3 <!-- --- PASTE THIS BLOCK AT THE BOTTOM OF THE PAGE --- -->
+    4 <!-- Load the Console Integration Library -->
+    5 <script src="/support/console/60.0/integration.js" type="text/javascript"></script>
+    6
+    7 <script type="text/javascript">
+    8     function forceConsoleTabTitle() {
+    9         var newTitle = "{!JSENCODE(sourceId)}";
+   10         
+   11         // If sourceId is empty, do nothing
+   12         if (!newTitle || newTitle.trim() === '') return;
+   13
+   14         // Check if we are inside the Salesforce Console
+   15         if (typeof sforce !== 'undefined' && sforce.console && sforce.console.isInConsole()) {
+   16             sforce.console.getEnclosingTabId(function(result) {
+   17                 if (result.id) {
+   18                     // Force the tab to rename to the sourceId
+   19                     sforce.console.setTabTitle(newTitle, result.id);
+   20                 }
+   21             });
+   22         }
+   23     }
+   24
+   25     // Run immediately, then again at 1s and 3s to overwrite the Lightning "Button Name"
+   26     var previousOnload = window.onload;
+   27     window.onload = function() {
+   28         if (previousOnload) { previousOnload(); }
+   29         forceConsoleTabTitle();
+   30         setTimeout(forceConsoleTabTitle, 1000);
+   31         setTimeout(forceConsoleTabTitle, 3000);
+   32     };
+   33 </script>
+   34 <!-- --- END PASTE BLOCK --- -->
