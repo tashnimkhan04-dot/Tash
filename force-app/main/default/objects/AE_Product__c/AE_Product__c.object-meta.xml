@@ -155,18 +155,6 @@ Open AE_CreateFormLauncherHelper.js and use:
         window.addEventListener("load", ultimateTitleOverride);
     })();
 </script>
-1. The Iframe Limitation (Visualforce in Lightning)
-  Document: Lightning Experience Limitations - Visualforce (https://help.salesforce.com/s/articleView?id=sf.lex_al_visualforce_limitations.htm&type=5)
-  > Key Point for Client: "Visualforce pages in Lightning Experience are wrapped in an iframe." 
-  >
-  > Why it matters: Because the page is inside an iframe, it cannot "reach out" to the main Salesforce tab to change its title like it could in Classic. This is a security and architectural standard in Lightning.
-
-  2. Tab Label vs. Page Title
-  Document: Developer Guide - Set Tab Titles in Lightning Experience (https://help.salesforce.com/s/articleView?id=000384832&type=1)
-  > Key Point for Client: Standard browser attributes like <title> or <apex:page title="..."> do not work for console tabs in Lightning. 
-  >
-  > Why it matters: In Classic, these standard HTML tags were enough. In Lightning, Salesforce ignores them and defaults to the Action Label (the button name). The only way to change it is through complex JavaScript workarounds.
-
-  3. Recommendation for Full Control (Workspace API)
-  Document: Salesforce Console Developer Guide - Lightning Workspace API (https://developer.salesforce.com/docs/component-library/bundle/lightning-workspace-api/documentation)
-  > Key Point for Client: Salesforce officially recommends 
+The AE Create Form is a Visualforce page built for Salesforce Classic Console. In Lightning Experience, Visualforce pages run inside a secure iframe on a different domain (vf.force.com vs lightning.force.com). Due to browser same-origin policy — a security standard enforced by all modern browsers — the VF page cannot communicate with the Lightning Console to update the tab title.
+This is a documented Salesforce platform limitation — not a development oversight. The only supported solution is to rebuild the form as a Lightning Web Component (LWC), which is a significant effort outside current project scope.
+The Source ID (C-05821205-AE-00) remains clearly visible on the form itself. Classic Console continues to work correctly with the proper tab title.
