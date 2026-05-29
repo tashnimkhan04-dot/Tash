@@ -1,88 +1,135 @@
-public with sharing class PAE_ProductInfoController {
+1. Aura Component
 
-    public List<ProductRow> productRows { get; set; }
+Open AE_CreateFormLauncher.cmp and use this:
 
-    public class ProductRow {
-        public String srNo { get; set; }
-        public String productName { get; set; }
-        public String productType { get; set; }
-        public String indication { get; set; }
-        public String dose { get; set; }
-        public String frequency { get; set; }
-        public String route { get; set; }
-        public String lotNumber { get; set; }
-        public String expiryDate { get; set; }
-        public String therapyStartDate { get; set; }
-        public String therapyEndDate { get; set; }
-        public String pickupStatus { get; set; }
-        public String technicalComplaint { get; set; }
+<aura:component implements="lightning:actionOverride,lightning:isUrlAddressable"
+                access="global">
+
+    <lightning:workspaceAPI aura:id="workspace"/>
+
+    <aura:attribute name="pageReference" type="Object"/>
+    <aura:attribute name="vfUrl" type="String"/>
+
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+
+    <iframe src="{!v.vfUrl}"
+            style="width:100%; height:100vh; border:0;"
+            frameborder="0"/>
+</aura:component>
+2. Aura JS Controller
+
+Open AE_CreateFormLauncherController.js and use:
+
+({
+    doInit : function(component, event, helper) {
+        helper.registerTabTitleListener(component);
+
+        var pageRef = component.get("v.pageReference");
+        var state = pageRef && pageRef.state ? pageRef.state : {};
+        var caseId = helper.getCaseIdFromContext(state);
+
+        var vfUrl = "/apex/CCMIC_AE_CreateForm";
+        var params = [];
+
+        Object.keys(state).forEach(function(key) {
+            if (state[key]) {
+                params.push(encodeURIComponent(key) + "=" + encodeURIComponent(state[key]));
+            }
+        });
+
+        if (caseId && !state.caseId) {
+            params.push("caseId=" + encodeURIComponent(caseId));
+        }
+
+        if (params.length > 0) {
+            vfUrl += "?" + params.join("&");
+        }
+
+        component.set("v.vfUrl", vfUrl);
     }
+})
+3. Aura Helper
 
-    public PAE_ProductInfoController(ApexPages.StandardController sc) {
-        productRows = new List<ProductRow>();
+Open AE_CreateFormLauncherHelper.js and use:
 
-        New_Potential_Adverse_Event__c pae = [
-            SELECT Product_Info_JSON__c
-            FROM New_Potential_Adverse_Event__c
-            WHERE Id = :sc.getId()
-            LIMIT 1
-        ];
+({
+    getCaseIdFromContext : function(state) {
+        if (state.caseId) {
+            return state.caseId;
+        }
 
-        if (String.isNotBlank(pae.Product_Info_JSON__c)) {
-            List<Object> parsed =
-                (List<Object>) JSON.deserializeUntyped(pae.Product_Info_JSON__c);
+        if (state.inContextOfRef) {
+            var context = state.inContextOfRef;
 
-            Integer counter = 1;
+            if (context.startsWith("1.")) {
+                context = context.substring(2);
+            }
 
-            for (Object obj : parsed) {
-                Map<String, Object> sourceRow = (Map<String, Object>) obj;
+            context = context.replace(/-/g, "+").replace(/_/g, "/");
 
-                ProductRow row = new ProductRow();
+            while (context.length % 4) {
+                context += "=";
+            }
 
-                row.srNo = getStringValue(sourceRow, 'srNo');
-                if (String.isBlank(row.srNo)) {
-                    row.srNo = String.valueOf(counter);
-                }
-
-                row.productName = getStringValue(sourceRow, 'productName');
-                row.productType = getStringValue(sourceRow, 'productType');
-                row.indication = getStringValue(sourceRow, 'indication');
-                row.dose = getStringValue(sourceRow, 'dose');
-                row.frequency = getStringValue(sourceRow, 'frequency');
-                row.route = getStringValue(sourceRow, 'route');
-                row.lotNumber = getStringValue(sourceRow, 'lotNumber');
-                row.expiryDate = getStringValue(sourceRow, 'expiryDate');
-                row.therapyStartDate = getStringValue(sourceRow, 'therapyStartDate');
-                row.therapyEndDate = getStringValue(sourceRow, 'therapyEndDate');
-                row.pickupStatus = getStringValue(sourceRow, 'pickupStatus');
-
-                row.technicalComplaint = getStringValue(sourceRow, 'technicalComplaint');
-
-                if (String.isBlank(row.technicalComplaint)) {
-                    String tcNumber = getStringValue(sourceRow, 'technicalComplaintNumber');
-                    String tcDesc = getStringValue(sourceRow, 'technicalComplaintDescription');
-
-                    if (!String.isBlank(tcNumber) && !String.isBlank(tcDesc)) {
-                        row.technicalComplaint = tcNumber + ' - ' + tcDesc;
-                    } else if (!String.isBlank(tcNumber)) {
-                        row.technicalComplaint = tcNumber;
-                    } else if (!String.isBlank(tcDesc)) {
-                        row.technicalComplaint = tcDesc;
-                    }
-                }
-
-                if (!String.isBlank(row.productName) || !String.isBlank(row.productType)) {
-                    productRows.add(row);
-                    counter++;
-                }
+            try {
+                var decodedContext = JSON.parse(window.atob(context));
+                return decodedContext.attributes.recordId;
+            } catch (e) {
+                console.log("Context decode error", e);
             }
         }
-    }
 
-    private static String getStringValue(Map<String, Object> sourceRow, String keyName) {
-        if (sourceRow != null && sourceRow.containsKey(keyName) && sourceRow.get(keyName) != null) {
-            return String.valueOf(sourceRow.get(keyName));
+        return null;
+    },
+
+    registerTabTitleListener : function(component) {
+        window.addEventListener("message", $A.getCallback(function(event) {
+            if (!event.data || event.data.type !== "AE_SET_TAB_TITLE") {
+                return;
+            }
+
+            var sourceId = event.data.sourceId;
+
+            if (!sourceId) {
+                return;
+            }
+
+            var workspaceAPI = component.find("workspace");
+
+            workspaceAPI.isConsoleNavigation().then(function(isConsole) {
+                if (isConsole) {
+                    workspaceAPI.getFocusedTabInfo().then(function(tabInfo) {
+                        workspaceAPI.setTabLabel({
+                            tabId: tabInfo.tabId,
+                            label: sourceId
+                        });
+                    });
+                }
+            });
+        }), false);
+    }
+})
+4. Add To VF Page
+
+In CCMIC_AE_CreateForm, add this script function:
+
+function notifyLightningTabTitle() {
+    try {
+        var sourceId = "{!JSENCODE(sourceId)}";
+
+        if (sourceId && sourceId.trim() !== "" && window.parent) {
+            window.parent.postMessage({
+                type: "AE_SET_TAB_TITLE",
+                sourceId: sourceId
+            }, "*");
         }
-        return '';
+    } catch (e) {
+        console.log("Lightning tab title error: " + e);
     }
 }
+Then in your existing window.onload, add:
+
+notifyLightningTabTitle();
+setTimeout(notifyLightningTabTitle, 1000);
+setTimeout(notifyLightningTabTitle, 2500);
+setTimeout(notifyLightningTabTitle, 5000);
