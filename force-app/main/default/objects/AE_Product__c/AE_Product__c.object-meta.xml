@@ -1,18 +1,5 @@
-Component.Apex.OutputLabel labelSafetyId = new Component.Apex.OutputLabel();
-labelSafetyId.id = 'labelSafetyId' + counter;
-labelSafetyId.value = '<font face="Arial" size="2">' + 'Safety ID:</font>';
-labelSafetyId.escape = false;
-
-Component.Apex.outputField safetyIdv = new Component.Apex.outputField();
-safetyIdv.expressions.value = '{!cases[' + counter + '].' + 'MICC_Safety_ID__c}';
-safetyIdv.id = 'MICC_Safety_ID__cv' + '_' + counter;
-
-pngridView.childComponents.add(labelAEGv);
-pngridView.childComponents.add(AEGISv);
-
-// Add Safety ID right here
-pngridView.childComponents.add(labelSafetyId);
-pngridView.childComponents.add(safetyIdv);
-
-pngridView.childComponents.add(labelPtcv);
-pngridView.childComponents.add(ptcv);
+MICC_Product__c prod = new MICC_Product__c(
+        Name = 'Test Product',
+        Product_Type__c = 'Drug'  // add if required field
+    );
+    insert prod;
