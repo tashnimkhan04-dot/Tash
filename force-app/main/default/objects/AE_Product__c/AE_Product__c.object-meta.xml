@@ -3,3 +3,7 @@ MICC_Product__c prod = new MICC_Product__c(
         Product_Type__c = 'Drug'  // add if required field
     );
     insert prod;
+SELECT QualifiedApiName, IsRequired 
+FROM FieldDefinition 
+WHERE EntityDefinition.QualifiedApiName = 'MICC_Product__c' 
+AND IsRequired = true
