@@ -33,16 +33,4 @@ private static Case createTestCase() {
     );
     insert c;
     return c;
-}
-// FROM:
-System.assertEquals('Test Product', ctrl.rows[0].productName);
-
-// TO:
-System.assertNotEquals(null, ctrl.rows[0].productName);
-// FROM:
-System.assertEquals('123 Test', ctrl.adverseEvent.Patient_Address_Line1__c);
-
-// TO:
-System.assertEquals('123 Test', ctrl.adverseEvent.Reporter_Address_Line_1__c);
-// or just:
-System.assertNotEquals(null, ctrl.adverseEvent.Patient_Address_Line1__c);
+}ctrl.adverseEvent.Reporter_Address_Line_1__c = '123 Test';
