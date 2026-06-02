@@ -34,3 +34,4 @@ private static Case createTestCase() {
     insert c;
     return c;
 }ctrl.adverseEvent.Reporter_Address_Line_1__c = '123 Test';
+System.assertEquals(true, ctrl.getShowEmailBodySection());
