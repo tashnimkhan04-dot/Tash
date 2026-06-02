@@ -35,3 +35,13 @@ private static Case createTestCase() {
     return c;
 }ctrl.adverseEvent.Reporter_Address_Line_1__c = '123 Test';
 System.assertEquals(true, ctrl.getShowEmailBodySection());
+ctrl.addRow();
+ctrl.addRow();
+
+Integer beforeRemoveSize = ctrl.rows.size();
+
+ctrl.rowToRemoveIndex = beforeRemoveSize;
+ctrl.removeRow();
+
+System.assertEquals(beforeRemoveSize - 1, ctrl.rows.size());
+System.assertEquals(1, ctrl.rows[0].srNo);
