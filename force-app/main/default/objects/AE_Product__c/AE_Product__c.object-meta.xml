@@ -37,11 +37,30 @@ private static Case createTestCase() {
 System.assertEquals(true, ctrl.getShowEmailBodySection());
 ctrl.addRow();
 ctrl.addRow();
+@IsTest
+static void testRowOperationsAndShowDetailsBounds() {
+    CCMIC_AE_CreateFormController ctrl = buildController(null);
 
-Integer beforeRemoveSize = ctrl.rows.size();
+    for (Integer i = 0; i < 15; i++) {
+        ctrl.addRow();
+    }
 
-ctrl.rowToRemoveIndex = beforeRemoveSize;
-ctrl.removeRow();
+    System.assertEquals(10, ctrl.rows.size());
 
-System.assertEquals(beforeRemoveSize - 1, ctrl.rows.size());
-System.assertEquals(1, ctrl.rows[0].srNo);
+    ctrl.rowToRemoveIndex = 2;
+    ctrl.removeRow();
+    System.assertEquals(9, ctrl.rows.size());
+
+    ctrl.rowToRemoveIndex = 99;
+    ctrl.removeRow();
+    System.assertEquals(9, ctrl.rows.size());
+
+    ctrl.selectedRowIndex = 1;
+    ctrl.showDetails();
+    System.assertNotEquals(null, ctrl.rows);
+    System.assertEquals(9, ctrl.rows.size());
+
+    ctrl.selectedRowIndex = 99;
+    ctrl.showDetails();
+    System.assertNotEquals(null, ctrl.rows);
+}
