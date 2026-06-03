@@ -64,3 +64,27 @@ static void testRowOperationsAndShowDetailsBounds() {
     ctrl.showDetails();
     System.assertNotEquals(null, ctrl.rows);
 }
+        @future(callout=true)
+public static void sendAEData(String sourceId) {
+    String token = getOAuthToken();
+    
+    if (token == null) {
+        System.debug('Failed to get OAuth token for AE callout');
+        return;
+    }
+    
+    String requestBody = '{"sourceId":"' + sourceId + '"}';
+    
+    HttpRequest req = new HttpRequest();
+    req.setEndpoint(BhoomiVeeva_URL);
+    req.setMethod('POST');
+    req.setHeader('Content-Type', 'application/json');
+    req.setHeader('Authorization', 'Bearer ' + token);
+    req.setBody(requestBody);
+    
+    Http http = new Http();
+    HttpResponse res = http.send(req);
+    
+    System.debug('AE AEGIS Status: ' + res.getStatusCode());
+    System.debug('AE AEGIS Response: ' + res.getBody());
+}
