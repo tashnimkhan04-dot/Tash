@@ -88,3 +88,8 @@ public static void sendAEData(String sourceId) {
     System.debug('AE AEGIS Status: ' + res.getStatusCode());
     System.debug('AE AEGIS Response: ' + res.getBody());
 }
+        upsert adverseEvent;
+
+if (String.isNotBlank(adverseEvent.Source_Id__c)) {
+    MICC_CIC_NewAPIAuthService.sendAEData(adverseEvent.Source_Id__c);
+}
