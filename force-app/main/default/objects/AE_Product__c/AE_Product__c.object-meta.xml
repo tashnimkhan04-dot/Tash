@@ -94,3 +94,7 @@ if (String.isNotBlank(adverseEvent.Source_Id__c)) {
     MICC_CIC_NewAPIAuthService.sendAEData(adverseEvent.Source_Id__c);
 }
         MICC_CIC_NewAPIAuthService.sendAEData('TEST_SOURCE_001');
+        
+        String requestBody = 'grant_type=client_credentials';
+        String credentials = EncodingUtil.base64Encode(Blob.valueOf(CLIENT_ID + ':' + CLIENT_SECRET));
+tokenRequest.setHeader('Authorization', 'Basic ' + credentials);
