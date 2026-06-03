@@ -98,3 +98,33 @@ if (String.isNotBlank(adverseEvent.Source_Id__c)) {
         String requestBody = 'grant_type=client_credentials';
         String credentials = EncodingUtil.base64Encode(Blob.valueOf(CLIENT_ID + ':' + CLIENT_SECRET));
 tokenRequest.setHeader('Authorization', 'Basic ' + credentials);
+        public static String getOAuthToken() {
+    String credentials = EncodingUtil.base64Encode(
+        Blob.valueOf(CLIENT_ID + ':' + CLIENT_SECRET)
+    );
+    
+    HttpRequest tokenRequest = new HttpRequest();
+    tokenRequest.setEndpoint(AUTH_URL);
+    tokenRequest.setMethod('POST');
+    tokenRequest.setHeader('Authorization', 'Basic ' + credentials);
+    tokenRequest.setHeader('Content-Type', 'application/x-www-form-urlencoded');
+    tokenRequest.setBody('grant_type=client_credentials');
+    
+    Http http = new Http();
+    HttpResponse tokenResponse;
+    
+    try {
+        tokenResponse = http.send(tokenRequest);
+        if (tokenResponse.getStatusCode() == 200) {
+            Map<String, Object> tokenData = 
+                (Map<String, Object>) JSON.deserializeUntyped(tokenResponse.getBody());
+            return (String) tokenData.get('access_token');
+        } else {
+            System.debug('Error getting token: ' + tokenResponse.getBody());
+            return null;
+        }
+    } catch (Exception e) {
+        System.debug('Exception getting token: ' + e.getMessage());
+        return null;
+    }
+}
