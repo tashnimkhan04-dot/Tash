@@ -93,3 +93,4 @@ public static void sendAEData(String sourceId) {
 if (String.isNotBlank(adverseEvent.Source_Id__c)) {
     MICC_CIC_NewAPIAuthService.sendAEData(adverseEvent.Source_Id__c);
 }
+        MICC_CIC_NewAPIAuthService.sendAEData('TEST_SOURCE_001');
