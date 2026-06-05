@@ -33,3 +33,16 @@ asppeNew.onSubmit =
     '} ' +
     'return true;';
 PEfld1.childcomponents.add(asppeNew);
+
+Component.Apex.actionsupport asppeNew = new Component.Apex.actionsupport();
+asppeNew.event = 'onchange';
+asppeNew.onSubmit =
+    'var selValue = this.options[this.selectedIndex].value; ' +
+    'if(selValue === "Sent/Faxed to Safety New"){ ' +
+    '  this.value = ""; ' +
+    '  var btn = document.querySelector("[id*=\'btnPAENew' + String.valueOf(counter) + '\']"); ' +
+    '  if(btn){ btn.click(); } ' +
+    '  return false; ' +
+    '} ' +
+    'return true;';
+PEfld1.childcomponents.add(asppeNew);
