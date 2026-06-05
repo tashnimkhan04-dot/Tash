@@ -1,160 +1,48 @@
+asppeNew.onSubmit =
+    'var selValue = this.options[this.selectedIndex].value; ' +
+    'if(selValue === "Sent/Faxed to Safety New"){ ' +
 
-private static Case createTestCase() {
-    // Query existing product instead of inserting new one
-    MICC_Product__c prod = [
-        SELECT Id, Name 
-        FROM MICC_Product__c 
-        LIMIT 1
-    ];
-    
-    Case c = new Case(
-        Subject = 'Test Case',
-        Status = 'New',
-        Origin = 'Phone',
-        MICC_Notes_History__c = 'Escalation test notes',
-        MICC_CaseNumber__c = 'CASE12345',
-        MICC_Source__c = 'EMAIL',
-        MICC_Received_Date__c = Date.today(),
-        MICC_Inquiry_For__c = 'Self',
-        MICC_Customer_Type__c = 'Consumer',
-        MICC_First_Name__c = 'John',
-        MICC_Last_Name__c = 'Doe',
-        MICC_Salutation__c = 'Mr.',
-        MICC_Org_name__c = 'ABC Org',
-        MICC_Address_Line_1__c = '123 Test',
-        MICC_Address_Line_2__c = 'Apt 4',
-        MICC_City__c = 'Dallas',
-        MICC_State__c = 'TX',
-        MICC_Zip_Code__c = '75001',
-        MICC_Phone__c = '1234567890',
-        MICC_Email__c = 'john.doe@test.com',
-        MICC_Fax__c = '1112223333',
-        MICC_Product__c = prod.Id
-    );
-    insert c;
-    return c;
-}ctrl.adverseEvent.Reporter_Address_Line_1__c = '123 Test';
-System.assertEquals(true, ctrl.getShowEmailBodySection());
-ctrl.addRow();
-ctrl.addRow();
-@IsTest
-static void testRowOperationsAndShowDetailsBounds() {
-    CCMIC_AE_CreateFormController ctrl = buildController(null);
+    '  var missingFields = []; ' +
 
-    for (Integer i = 0; i < 15; i++) {
-        ctrl.addRow();
-    }
+    // 1. Product check
+    '  var productField = document.querySelector("[id*=\'MICCPrd1_\'" + counter + "\']\"); ' +
+    '  if(!productField || !productField.value || productField.value === "" || productField.value === "--NONE--"){ ' +
+    '    missingFields.push("Product"); ' +
+    '  } ' +
 
-    System.assertEquals(10, ctrl.rows.size());
+    // 2. Gender check - using confirmed ID
+    '  var genderField = document.querySelector("[id*=\'custGender\']"); ' +
+    '  if(!genderField || !genderField.value || genderField.value === "" || genderField.value === "--None--"){ ' +
+    '    missingFields.push("Gender"); ' +
+    '  } ' +
 
-    ctrl.rowToRemoveIndex = 2;
-    ctrl.removeRow();
-    System.assertEquals(9, ctrl.rows.size());
+    // 3. Inquiry For check
+    '  var inquiryForField = document.querySelector("[id*=\'MICC_Inquiry_For\']"); ' +
+    '  if(!inquiryForField || !inquiryForField.value || inquiryForField.value === "" || inquiryForField.value === "--None--"){ ' +
+    '    missingFields.push("Inquiry For"); ' +
+    '  } ' +
 
-    ctrl.rowToRemoveIndex = 99;
-    ctrl.removeRow();
-    System.assertEquals(9, ctrl.rows.size());
+    // Same error format as ValidateOpenNewPAE
+    '  if(missingFields.length > 0){ ' +
+    '    var errorMsg = "Please populate below fields\\n- " + missingFields.join("\\n- "); ' +
+    '    alert(errorMsg); ' +
+    '    this.value = ""; ' +
+    '    return false; ' +
+    '  } ' +
 
-    ctrl.selectedRowIndex = 1;
-    ctrl.showDetails();
-    System.assertNotEquals(null, ctrl.rows);
-    System.assertEquals(9, ctrl.rows.size());
-
-    ctrl.selectedRowIndex = 99;
-    ctrl.showDetails();
-    System.assertNotEquals(null, ctrl.rows);
-}
-        @future(callout=true)
-public static void sendAEData(String sourceId) {
-    String token = getOAuthToken();
-    
-    if (token == null) {
-        System.debug('Failed to get OAuth token for AE callout');
-        return;
-    }
-    
-    String requestBody = '{"sourceId":"' + sourceId + '"}';
-    
-    HttpRequest req = new HttpRequest();
-    req.setEndpoint(BhoomiVeeva_URL);
-    req.setMethod('POST');
-    req.setHeader('Content-Type', 'application/json');
-    req.setHeader('Authorization', 'Bearer ' + token);
-    req.setBody(requestBody);
-    
-    Http http = new Http();
-    HttpResponse res = http.send(req);
-    
-    System.debug('AE AEGIS Status: ' + res.getStatusCode());
-    System.debug('AE AEGIS Response: ' + res.getBody());
-}
-        upsert adverseEvent;
-
-if (String.isNotBlank(adverseEvent.Source_Id__c)) {
-    MICC_CIC_NewAPIAuthService.sendAEData(adverseEvent.Source_Id__c);
-}
-        MICC_CIC_NewAPIAuthService.sendAEData('TEST_SOURCE_001');
-        
-        String requestBody = 'grant_type=client_credentials';
-        String credentials = EncodingUtil.base64Encode(Blob.valueOf(CLIENT_ID + ':' + CLIENT_SECRET));
-tokenRequest.setHeader('Authorization', 'Basic ' + credentials);
-        public static String getOAuthToken() {
-    String credentials = EncodingUtil.base64Encode(
-        Blob.valueOf(CLIENT_ID + ':' + CLIENT_SECRET)
-    );
-    
-    HttpRequest tokenRequest = new HttpRequest();
-    tokenRequest.setEndpoint(AUTH_URL);
-    tokenRequest.setMethod('POST');
-    tokenRequest.setHeader('Authorization', 'Basic ' + credentials);
-    tokenRequest.setHeader('Content-Type', 'application/x-www-form-urlencoded');
-    tokenRequest.setBody('grant_type=client_credentials');
-    
-    Http http = new Http();
-    HttpResponse tokenResponse;
-    
-    try {
-        tokenResponse = http.send(tokenRequest);
-        if (tokenResponse.getStatusCode() == 200) {
-            Map<String, Object> tokenData = 
-                (Map<String, Object>) JSON.deserializeUntyped(tokenResponse.getBody());
-            return (String) tokenData.get('access_token');
-        } else {
-            System.debug('Error getting token: ' + tokenResponse.getBody());
-            return null;
-        }
-    } catch (Exception e) {
-        System.debug('Exception getting token: ' + e.getMessage());
-        return null;
-    }
-}
-                    public static String getOAuthToken() {
-    String credentials = EncodingUtil.base64Encode(
-        Blob.valueOf(CLIENT_ID + ':' + CLIENT_SECRET)
-    );
-    
-    HttpRequest tokenRequest = new HttpRequest();
-    tokenRequest.setEndpoint(AUTH_URL);
-    tokenRequest.setMethod('POST');
-    tokenRequest.setHeader('Authorization', 'Basic ' + credentials);
-    tokenRequest.setHeader('Content-Type', 'application/x-www-form-urlencoded');
-    tokenRequest.setBody('grant_type=client_credentials');
-    
-    Http http = new Http();
-    HttpResponse tokenResponse;
-    
-    try {
-        tokenResponse = http.send(tokenRequest);
-        if (tokenResponse.getStatusCode() == 200) {
-            Map<String, Object> tokenData = 
-                (Map<String, Object>) JSON.deserializeUntyped(tokenResponse.getBody());
-            return (String) tokenData.get('access_token');
-        } else {
-            System.debug('Error getting token: ' + tokenResponse.getBody());
-            return null;
-        }
-    } catch (Exception e) {
-        System.debug('Exception getting token: ' + e.getMessage());
-        return null;
-    }
-}
+    // Open PAE form - console subtab or window
+    '  if(typeof sforce !== "undefined" && sforce.console && sforce.console.isInConsole()){ ' +
+    '    var pageUrl = "/apex/CCMIC_AE_CreateForm?caseId=" + parentCaseIdParam + "&inquiryId=" + currentInqId + "&caseNumber=" + currentCaseNum + ""; ' +
+    '    sforce.console.getEnclosingPrimaryTabId(function(result){ ' +
+    '      if(result.success){ ' +
+    '        var primaryTabId = result.id; ' +
+    '        sforce.console.openSubtab(primaryTabId, pageUrl, true, "PAE - " + currentCaseNum + "", null, null, "salesforce1"); ' +
+    '      } ' +
+    '    }); ' +
+    '  } else { ' +
+    '    window.open("/apex/CCMIC_AE_CreateForm?caseId=" + parentCaseIdParam + "&inquiryId=" + currentInqId + "&caseNumber=" + currentCaseNum + "", "_blank"); ' +
+    '  } ' +
+    '  return false; ' +
+    '} ' +
+    'return true;';
+document.querySelector("[id*='MICC_Inquiry_For']")
