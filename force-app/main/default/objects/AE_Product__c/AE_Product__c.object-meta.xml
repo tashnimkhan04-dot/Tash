@@ -59,3 +59,11 @@ asppeNew.onSubmit =
     '} ' +
     'return true;';
 PEfld1.childcomponents.add(asppeNew);
+if (
+    typeof MICC_IS_LIGHTNING === "undefined" &&
+    typeof sforce !== "undefined" &&
+    sforce.console &&
+    typeof sforce.console.setTabTitle === "function"
+) {
+    sforce.console.setTabTitle("Edit - " + "{!ParentCase.CaseNumber}");
+}
