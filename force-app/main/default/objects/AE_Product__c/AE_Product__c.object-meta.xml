@@ -2,7 +2,8 @@ asppeNew.onSubmit =
     'var selValue = this.options[this.selectedIndex].value; ' +
     'if(selValue === "Sent/Faxed to Safety New"){ ' +
     '  var missingFields = []; ' +
-    '  var productField = document.querySelector("[id*=\'MICCPrd1_" + counter + "\']"); ' +
+    '  var currentRow = this.closest("tr"); ' +
+    '  var productField = currentRow ? currentRow.querySelector("[id*=\'MICCPrd1_\']") : null; ' +
     '  if(!productField || !productField.value || productField.value === "" || productField.value === "--NONE--"){ ' +
     '    missingFields.push("Product"); ' +
     '  } ' +
