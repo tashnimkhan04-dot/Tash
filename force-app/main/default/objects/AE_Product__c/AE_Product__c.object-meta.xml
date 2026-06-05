@@ -7,7 +7,7 @@ if(c != null && c.ParentId != null){
     parentCaseIdParam = String.escapeSingleQuotes(String.valueOf(c.ParentId));
 }
 
-// Hidden output fields to expose server-side validation result to JS
+// Hidden output fields to read server-side validation result in JS
 Component.Apex.outputText hidCanOpen = new Component.Apex.outputText();
 hidCanOpen.id = 'hidNewPAECanOpen_' + String.valueOf(counter);
 hidCanOpen.value = '{!NewPAECanOpen}';
@@ -18,17 +18,18 @@ hidErrMsg.id = 'hidNewPAEErrorMsg_' + String.valueOf(counter);
 hidErrMsg.value = '{!NewPAEErrorMsg}';
 PEfld1.childcomponents.add(hidErrMsg);
 
-// ActionFunction to call ValidateOpenNewPAE server-side
-Component.Apex.actionFunction afValidate = new Component.Apex.actionFunction();
-afValidate.id = 'afValidatePAE_' + String.valueOf(counter);
-afValidate.name = 'afValidatePAE_' + String.valueOf(counter);
-afValidate.action = '{!ValidateOpenNewPAE}';
-afValidate.rerender = 'hidNewPAECanOpen_' + String.valueOf(counter) + ',hidNewPAEErrorMsg_' + String.valueOf(counter);
-afValidate.oncomplete = 
+// Hidden button that triggers ValidateOpenNewPAE server-side
+Component.Apex.commandButton hidBtn = new Component.Apex.commandButton();
+hidBtn.id = 'hidBtnValidatePAE_' + String.valueOf(counter);
+hidBtn.value = '';
+hidBtn.style = 'display:none';
+hidBtn.action = new ApexPages.Action('{!ValidateOpenNewPAE}');
+hidBtn.rerender = 'hidNewPAECanOpen_' + String.valueOf(counter) + ' hidNewPAEErrorMsg_' + String.valueOf(counter);
+hidBtn.oncomplete =
     'var canOpen = document.querySelector("[id*=\'hidNewPAECanOpen_' + String.valueOf(counter) + '\']"); ' +
     'var errMsg = document.querySelector("[id*=\'hidNewPAEErrorMsg_' + String.valueOf(counter) + '\']"); ' +
-    'var canOpenVal = canOpen ? canOpen.innerText : ""; ' +
-    'var errMsgVal = errMsg ? errMsg.innerText : ""; ' +
+    'var canOpenVal = canOpen ? canOpen.innerText.trim() : ""; ' +
+    'var errMsgVal = errMsg ? errMsg.innerText.trim() : ""; ' +
     'if(canOpenVal === "true"){ ' +
     '  var pageUrl = "/apex/CCMIC_AE_CreateForm?caseId=' + parentCaseIdParam + '&inquiryId=' + currentInqId + '&caseNumber=' + currentCaseNum + '"; ' +
     '  if(typeof sforce !== "undefined" && sforce.console && sforce.console.isInConsole()){ ' +
@@ -42,18 +43,17 @@ afValidate.oncomplete =
     '  } ' +
     '} else { ' +
     '  if(errMsgVal){ alert(errMsgVal); } ' +
-    '  var sel = document.querySelector("[id*=\'MICCPrd1_' + String.valueOf(counter) + '\']"); ' +
-    '  if(sel) sel.value = ""; ' +
     '} ';
-PEfld1.childcomponents.add(afValidate);
+PEfld1.childcomponents.add(hidBtn);
 
-// ActionSupport for "Sent/Faxed to Safety New" picklist
+// ActionSupport for "Sent/Faxed to Safety New" picklist onchange
 Component.Apex.actionsupport asppeNew = new Component.Apex.actionsupport();
 asppeNew.event = 'onchange';
 asppeNew.onSubmit =
     'var selValue = this.options[this.selectedIndex].value; ' +
     'if(selValue === "Sent/Faxed to Safety New"){ ' +
-    '  afValidatePAE_' + String.valueOf(counter) + '(); ' +
+    '  var btn = document.querySelector("[id*=\'hidBtnValidatePAE_' + String.valueOf(counter) + '\']"); ' +
+    '  if(btn){ btn.click(); } ' +
     '  this.value = ""; ' +
     '  return false; ' +
     '} ' +
