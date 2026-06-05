@@ -1,48 +1,36 @@
 asppeNew.onSubmit =
     'var selValue = this.options[this.selectedIndex].value; ' +
     'if(selValue === "Sent/Faxed to Safety New"){ ' +
-
     '  var missingFields = []; ' +
-
-    // 1. Product check
-    '  var productField = document.querySelector("[id*=\'MICCPrd1_\'" + counter + "\']\"); ' +
+    '  var productField = document.querySelector("[id*=\'MICCPrd1_" + counter + "\']"); ' +
     '  if(!productField || !productField.value || productField.value === "" || productField.value === "--NONE--"){ ' +
     '    missingFields.push("Product"); ' +
     '  } ' +
-
-    // 2. Gender check - using confirmed ID
     '  var genderField = document.querySelector("[id*=\'custGender\']"); ' +
     '  if(!genderField || !genderField.value || genderField.value === "" || genderField.value === "--None--"){ ' +
     '    missingFields.push("Gender"); ' +
     '  } ' +
-
-    // 3. Inquiry For check
     '  var inquiryForField = document.querySelector("[id*=\'MICC_Inquiry_For\']"); ' +
     '  if(!inquiryForField || !inquiryForField.value || inquiryForField.value === "" || inquiryForField.value === "--None--"){ ' +
     '    missingFields.push("Inquiry For"); ' +
     '  } ' +
-
-    // Same error format as ValidateOpenNewPAE
     '  if(missingFields.length > 0){ ' +
     '    var errorMsg = "Please populate below fields\\n- " + missingFields.join("\\n- "); ' +
     '    alert(errorMsg); ' +
     '    this.value = ""; ' +
     '    return false; ' +
     '  } ' +
-
-    // Open PAE form - console subtab or window
     '  if(typeof sforce !== "undefined" && sforce.console && sforce.console.isInConsole()){ ' +
-    '    var pageUrl = "/apex/CCMIC_AE_CreateForm?caseId=" + parentCaseIdParam + "&inquiryId=" + currentInqId + "&caseNumber=" + currentCaseNum + ""; ' +
+    '    var pageUrl = "/apex/CCMIC_AE_CreateForm?caseId=" + parentCaseIdParam + "&inquiryId=" + currentInqId + "&caseNumber=" + currentCaseNum; ' +
     '    sforce.console.getEnclosingPrimaryTabId(function(result){ ' +
     '      if(result.success){ ' +
     '        var primaryTabId = result.id; ' +
-    '        sforce.console.openSubtab(primaryTabId, pageUrl, true, "PAE - " + currentCaseNum + "", null, null, "salesforce1"); ' +
+    '        sforce.console.openSubtab(primaryTabId, pageUrl, true, "PAE - " + currentCaseNum, null, null, "salesforce1"); ' +
     '      } ' +
     '    }); ' +
     '  } else { ' +
-    '    window.open("/apex/CCMIC_AE_CreateForm?caseId=" + parentCaseIdParam + "&inquiryId=" + currentInqId + "&caseNumber=" + currentCaseNum + "", "_blank"); ' +
+    '    window.open("/apex/CCMIC_AE_CreateForm?caseId=" + parentCaseIdParam + "&inquiryId=" + currentInqId + "&caseNumber=" + currentCaseNum, "_blank"); ' +
     '  } ' +
     '  return false; ' +
     '} ' +
     'return true;';
-document.querySelector("[id*='MICC_Inquiry_For']")
