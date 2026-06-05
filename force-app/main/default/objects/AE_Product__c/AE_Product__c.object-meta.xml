@@ -1,37 +1,61 @@
-asppeNew.onSubmit =
-    'var selValue = this.options[this.selectedIndex].value; ' +
-    'if(selValue === "Sent/Faxed to Safety New"){ ' +
-    '  var missingFields = []; ' +
-    '  var currentRow = this.closest("tr"); ' +
-    '  var productField = currentRow ? currentRow.querySelector("[id*=\'MICCPrd1_\']") : null; ' +
-    '  if(!productField || !productField.value || productField.value === "" || productField.value === "--NONE--"){ ' +
-    '    missingFields.push("Product"); ' +
-    '  } ' +
-    '  var genderField = document.querySelector("[id*=\'custGender\']"); ' +
-    '  if(!genderField || !genderField.value || genderField.value === "" || genderField.value === "--None--"){ ' +
-    '    missingFields.push("Gender"); ' +
-    '  } ' +
-    '  var inquiryForField = document.querySelector("[id*=\'MICC_Inquiry_For\']"); ' +
-    '  if(!inquiryForField || !inquiryForField.value || inquiryForField.value === "" || inquiryForField.value === "--None--"){ ' +
-    '    missingFields.push("Inquiry For"); ' +
-    '  } ' +
-    '  if(missingFields.length > 0){ ' +
-    '    var errorMsg = "Please populate below fields\\n- " + missingFields.join("\\n- "); ' +
-    '    alert(errorMsg); ' +
-    '    this.value = ""; ' +
-    '    return false; ' +
-    '  } ' +
+//NEW: Handle "Sent/Faxed to Safety New" - Console Subtab with Parent+Inquiry IDs + Validation
+String currentInqId = (c != null && c.Id != null) ? String.escapeSingleQuotes(String.valueOf(c.Id)) : '';
+String currentCaseNum = (c != null && c.MICC_CaseNumber__c != null) ? String.escapeSingleQuotes(c.MICC_CaseNumber__c) : '';
+String parentCaseIdParam = '';
+
+if(c != null && c.ParentId != null){
+    parentCaseIdParam = String.escapeSingleQuotes(String.valueOf(c.ParentId));
+}
+
+// Hidden output fields to expose server-side validation result to JS
+Component.Apex.outputText hidCanOpen = new Component.Apex.outputText();
+hidCanOpen.id = 'hidNewPAECanOpen_' + String.valueOf(counter);
+hidCanOpen.value = '{!NewPAECanOpen}';
+PEfld1.childcomponents.add(hidCanOpen);
+
+Component.Apex.outputText hidErrMsg = new Component.Apex.outputText();
+hidErrMsg.id = 'hidNewPAEErrorMsg_' + String.valueOf(counter);
+hidErrMsg.value = '{!NewPAEErrorMsg}';
+PEfld1.childcomponents.add(hidErrMsg);
+
+// ActionFunction to call ValidateOpenNewPAE server-side
+Component.Apex.actionFunction afValidate = new Component.Apex.actionFunction();
+afValidate.id = 'afValidatePAE_' + String.valueOf(counter);
+afValidate.name = 'afValidatePAE_' + String.valueOf(counter);
+afValidate.action = '{!ValidateOpenNewPAE}';
+afValidate.rerender = 'hidNewPAECanOpen_' + String.valueOf(counter) + ',hidNewPAEErrorMsg_' + String.valueOf(counter);
+afValidate.oncomplete = 
+    'var canOpen = document.querySelector("[id*=\'hidNewPAECanOpen_' + String.valueOf(counter) + '\']"); ' +
+    'var errMsg = document.querySelector("[id*=\'hidNewPAEErrorMsg_' + String.valueOf(counter) + '\']"); ' +
+    'var canOpenVal = canOpen ? canOpen.innerText : ""; ' +
+    'var errMsgVal = errMsg ? errMsg.innerText : ""; ' +
+    'if(canOpenVal === "true"){ ' +
+    '  var pageUrl = "/apex/CCMIC_AE_CreateForm?caseId=' + parentCaseIdParam + '&inquiryId=' + currentInqId + '&caseNumber=' + currentCaseNum + '"; ' +
     '  if(typeof sforce !== "undefined" && sforce.console && sforce.console.isInConsole()){ ' +
-    '    var pageUrl = "/apex/CCMIC_AE_CreateForm?caseId=" + parentCaseIdParam + "&inquiryId=" + currentInqId + "&caseNumber=" + currentCaseNum; ' +
     '    sforce.console.getEnclosingPrimaryTabId(function(result){ ' +
     '      if(result.success){ ' +
-    '        var primaryTabId = result.id; ' +
-    '        sforce.console.openSubtab(primaryTabId, pageUrl, true, "PAE - " + currentCaseNum, null, null, "salesforce1"); ' +
+    '        sforce.console.openSubtab(result.id, pageUrl, true, "PAE - ' + currentCaseNum + '", null, null, "salesforce1"); ' +
     '      } ' +
     '    }); ' +
     '  } else { ' +
-    '    window.open("/apex/CCMIC_AE_CreateForm?caseId=" + parentCaseIdParam + "&inquiryId=" + currentInqId + "&caseNumber=" + currentCaseNum, "_blank"); ' +
+    '    window.open(pageUrl, "_blank"); ' +
     '  } ' +
+    '} else { ' +
+    '  if(errMsgVal){ alert(errMsgVal); } ' +
+    '  var sel = document.querySelector("[id*=\'MICCPrd1_' + String.valueOf(counter) + '\']"); ' +
+    '  if(sel) sel.value = ""; ' +
+    '} ';
+PEfld1.childcomponents.add(afValidate);
+
+// ActionSupport for "Sent/Faxed to Safety New" picklist
+Component.Apex.actionsupport asppeNew = new Component.Apex.actionsupport();
+asppeNew.event = 'onchange';
+asppeNew.onSubmit =
+    'var selValue = this.options[this.selectedIndex].value; ' +
+    'if(selValue === "Sent/Faxed to Safety New"){ ' +
+    '  afValidatePAE_' + String.valueOf(counter) + '(); ' +
+    '  this.value = ""; ' +
     '  return false; ' +
     '} ' +
     'return true;';
+PEfld1.childcomponents.add(asppeNew);
