@@ -67,3 +67,17 @@ if (
 ) {
     sforce.console.setTabTitle("Edit - " + "{!ParentCase.CaseNumber}");
 }
+function defaultTabTitle() {
+    if (
+        typeof MICC_IS_LIGHTNING === "undefined" &&
+        typeof sforce !== "undefined" &&
+        sforce.console &&
+        typeof sforce.console.setTabTitle === "function"
+    ) {
+        sforce.console.setTabTitle("Edit - " + "{!ParentCase.CaseNumber}");
+    }
+}
+
+window.onload = function() {
+    defaultTabTitle();
+};
