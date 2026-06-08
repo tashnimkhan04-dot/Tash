@@ -94,3 +94,33 @@ window.onload = function() {
         </apex:commandLink>
     </div>
 </td>
+NewPAEUrl = Page.CCMIC_AE_CreateForm.getUrl();
+NewPAEUrl += '?caseId=' + EncodingUtil.urlEncode(parentCaseId, 'UTF-8');
+NewPAEUrl += '&inquiryId=' + EncodingUtil.urlEncode(String.valueOf(selectedInquiry.Id), 'UTF-8');
+NewPAEUrl += '&potentialAE=' + EncodingUtil.urlEncode('Sent/Faxed to Safety New', 'UTF-8');
+NewPAECanOpen = 'true';
+public PageReference init() {
+    String caseIdParam = ApexPages.currentPage().getParameters().get('caseId');
+
+    if (!String.isBlank(caseIdParam)) {
+        caseId = Id.valueOf(caseIdParam);
+    }
+
+    // NEW - read potentialAE param and update inquiry case field
+    String potentialAEParam = ApexPages.currentPage().getParameters().get('potentialAE');
+    String inquiryIdParam = ApexPages.currentPage().getParameters().get('inquiryId');
+
+    if (!String.isBlank(potentialAEParam) && !String.isBlank(inquiryIdParam)) {
+        try {
+            Case inquiryCase = new Case(
+                Id = Id.valueOf(inquiryIdParam),
+                MICC_Potential_Adverse_Event__c = potentialAEParam
+            );
+            update inquiryCase;
+        } catch (Exception e) {
+            System.debug('Error setting Potential AE: ' + e.getMessage());
+        }
+    }
+
+    return null;
+}
