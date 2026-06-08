@@ -81,3 +81,16 @@ function defaultTabTitle() {
 window.onload = function() {
     defaultTabTitle();
 };
+<td>
+    <div style="display:flex; gap:2px; justify-content:center; align-items:center; min-height:28px;">
+        <apex:commandLink action="{!addRow}" reRender="productTablePanel" 
+            styleClass="addButton" rendered="{!rows.size < 10}">
+            <span>+</span>
+        </apex:commandLink>
+        <apex:commandLink action="{!removeRow}" reRender="productTablePanel" 
+            styleClass="removeButton" rendered="{!row.srNo > 1}">
+            <span>-</span>
+            <apex:param name="rowToDel" value="{!row.srNo}" assignTo="{!rowToRemoveIndex}"/>
+        </apex:commandLink>
+    </div>
+</td>
