@@ -107,3 +107,14 @@ public PageReference init() {
     return null;
 }
 }
+if (selectedInquiry != null && selectedInquiry.Id != null) {
+    selectedInquiry.MICC_Encrypt__c = true;
+    update selectedInquiry;
+    
+    // Separate update for Potential AE to avoid field overwrite issue
+    Case paeUpdate = new Case(
+        Id = selectedInquiry.Id,
+        MICC_Potential_Adverse_Event__c = 'Sent/Faxed to Safety New'
+    );
+    update paeUpdate;
+}
