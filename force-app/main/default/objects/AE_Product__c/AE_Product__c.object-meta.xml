@@ -118,3 +118,13 @@ if (selectedInquiry != null && selectedInquiry.Id != null) {
     );
     update paeUpdate;
 }
+
+Case paeUpdate = new Case(
+    Id = selectedInquiry.Id,
+    MICC_Potential_Adverse_Event__c = 'Sent/Faxed to Safety New'
+);
+update paeUpdate;
+
+// Debug - verify update worked
+Case verify = [SELECT MICC_Potential_Adverse_Event__c FROM Case WHERE Id = :selectedInquiry.Id LIMIT 1];
+System.debug('PAE Value after update: ' + verify.MICC_Potential_Adverse_Event__c);
