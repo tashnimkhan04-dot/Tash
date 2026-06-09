@@ -81,46 +81,29 @@ function defaultTabTitle() {
 window.onload = function() {
     defaultTabTitle();
 };
-<td>
-    <div style="display:flex; gap:2px; justify-content:center; align-items:center; min-height:28px;">
-        <apex:commandLink action="{!addRow}" reRender="productTablePanel" 
-            styleClass="addButton" rendered="{!rows.size < 10}">
-            <span>+</span>
-        </apex:commandLink>
-        <apex:commandLink action="{!removeRow}" reRender="productTablePanel" 
-            styleClass="removeButton" rendered="{!row.srNo > 1}">
-            <span>-</span>
-            <apex:param name="rowToDel" value="{!row.srNo}" assignTo="{!rowToRemoveIndex}"/>
-        </apex:commandLink>
-    </div>
-</td>
-NewPAEUrl = Page.CCMIC_AE_CreateForm.getUrl();
-NewPAEUrl += '?caseId=' + EncodingUtil.urlEncode(parentCaseId, 'UTF-8');
-NewPAEUrl += '&inquiryId=' + EncodingUtil.urlEncode(String.valueOf(selectedInquiry.Id), 'UTF-8');
-NewPAEUrl += '&potentialAE=' + EncodingUtil.urlEncode('Sent/Faxed to Safety New', 'UTF-8');
-NewPAECanOpen = 'true';
+var url = "{!URLFOR($Page.CCMIC_AE_CreateForm)}";
+url += "?caseId=" + encodeURIComponent(parentCaseId);
+url += "&potentialAE=Sent%2FFaxed+to+Safety+New";
+
 public PageReference init() {
     String caseIdParam = ApexPages.currentPage().getParameters().get('caseId');
-
     if (!String.isBlank(caseIdParam)) {
         caseId = Id.valueOf(caseIdParam);
     }
 
-    // NEW - read potentialAE param and update inquiry case field
     String potentialAEParam = ApexPages.currentPage().getParameters().get('potentialAE');
     String inquiryIdParam = ApexPages.currentPage().getParameters().get('inquiryId');
-
     if (!String.isBlank(potentialAEParam) && !String.isBlank(inquiryIdParam)) {
         try {
-            Case inquiryCase = new Case(
+            update new Case(
                 Id = Id.valueOf(inquiryIdParam),
                 MICC_Potential_Adverse_Event__c = potentialAEParam
             );
-            update inquiryCase;
         } catch (Exception e) {
             System.debug('Error setting Potential AE: ' + e.getMessage());
         }
     }
 
     return null;
+}
 }
