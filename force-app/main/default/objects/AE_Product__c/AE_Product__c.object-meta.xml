@@ -153,3 +153,13 @@ asppeNew.onSubmit =
     '} ' +
     'return true;';
 PEfld1.childcomponents.add(asppeNew);
+
+    function isLightningUi() {
+    if (typeof sforce !== 'undefined' && 
+        sforce.console && 
+        typeof sforce.console.isInConsole === 'function') {
+        return false; // Classic Console - never treat as Lightning
+    }
+    return window.MICC_UI_THEME &&
+           window.MICC_UI_THEME.indexOf('Theme4') === 0;
+}
