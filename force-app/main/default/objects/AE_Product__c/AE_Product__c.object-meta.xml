@@ -142,3 +142,10 @@ if (selectedInquiry != null && selectedInquiry.Id != null) {
     if (selectedInquiry != null && selectedInquiry.Id != null) {
     selectedInquiry.MICC_Encrypt__c = true;
     update selectedInquiry;
+
+    f (canOpen === "true" && url && url !== "") {
+    if (miccIsLightningRuntime()) {
+        return navigateLightning(url);
+    }
+    return navigateClassicConsole(url);
+}
