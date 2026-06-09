@@ -147,3 +147,17 @@ if (selectedInquiry != null && selectedInquiry.Id != null) {
         cases[SelectedCounter].MICC_Potential_Adverse_Event__c = 'Sent/Faxed to Safety New';
     }
 }
+
+            if (canOpen === "true" && url && url !== "") {
+    // Set Potential AE picklist to Sent/Faxed to Safety New
+    var counter = "{!JSENCODE(SelectedCounter)}";
+    var paeFieldId = "mic:form_Call_Center:pb0:MICC_Potential_Adverse_Event__c1_" + counter;
+    var paeField = document.getElementById(paeFieldId);
+    if (paeField) {
+        paeField.value = 'Sent/Faxed to Safety New';
+    }
+    if (miccIsLightningRuntime()) {
+        return navigateLightning(url);
+    }
+    return navigateClassicConsole(url);
+}
