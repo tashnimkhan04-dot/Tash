@@ -130,26 +130,20 @@ if (cases != null && SelectedCounter != null &&
         cases[SelectedCounter].MICC_Potential_Adverse_Event__c = 'Sent/Faxed to Safety New';
         update cases[SelectedCounter];
     }
-<script>
-window.addEventListener('load', function() {
-    // Read potentialAE param from URL
-    var urlParams = new URLSearchParams(window.location.search);
-    var potentialAE = urlParams.get('potentialAE');
-    if (potentialAE) {
-        // Find the Potential AE picklist and set its value
-        var selects = document.querySelectorAll("select");
-        for (var i = 0; i < selects.length; i++) {
-            var opts = selects[i].options;
-            for (var j = 0; j < opts.length; j++) {
-                if (opts[j].value === potentialAE) {
-                    selects[i].value = potentialAE;
-                    // Trigger change event
-                    var event = new Event('change');
-                    selects[i].dispatchEvent(event);
-                    break;
-                }
-            }
-        }
+if (selectedInquiry != null && selectedInquiry.Id != null) {
+    selectedInquiry.MICC_Encrypt__c = true;
+    update selectedInquiry;
+    
+    // Update Potential AE in DB
+    Case paeUpdate = new Case(
+        Id = selectedInquiry.Id,
+        MICC_Potential_Adverse_Event__c = 'Sent/Faxed to Safety New'
+    );
+    update paeUpdate;
+    
+    // Update in-memory cases list
+    if (cases != null && SelectedCounter != null &&
+        SelectedCounter >= 0 && SelectedCounter < cases.size()) {
+        cases[SelectedCounter].MICC_Potential_Adverse_Event__c = 'Sent/Faxed to Safety New';
     }
-});
-</script>
+}
