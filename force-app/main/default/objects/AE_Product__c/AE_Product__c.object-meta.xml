@@ -167,3 +167,5 @@ PEfld1.childcomponents.add(asppeNew);
     return window.MICC_UI_THEME &&
            window.MICC_UI_THEME.indexOf('Theme4') === 0;
 }
+            ParentCaseIdForNewPAE = ApexPages.currentPage()
+                                .getParameters().get('id');
