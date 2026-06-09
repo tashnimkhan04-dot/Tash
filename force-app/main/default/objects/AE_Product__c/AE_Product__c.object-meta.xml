@@ -161,3 +161,7 @@ if (selectedInquiry != null && selectedInquiry.Id != null) {
     }
     return navigateClassicConsole(url);
 }
+if (selectedInquiry != null && selectedInquiry.Id != null) {
+    selectedInquiry.MICC_Encrypt__c = true;
+    selectedInquiry.MICC_Potential_Adverse_Event__c = 'Sent/Faxed to Safety New';
+    update selectedInquiry;
