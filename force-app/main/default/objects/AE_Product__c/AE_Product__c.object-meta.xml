@@ -130,22 +130,15 @@ if (cases != null && SelectedCounter != null &&
         cases[SelectedCounter].MICC_Potential_Adverse_Event__c = 'Sent/Faxed to Safety New';
         update cases[SelectedCounter];
     }
-if (selectedInquiry != null && selectedInquiry.Id != null) {
-    selectedInquiry.MICC_Encrypt__c = true;
-    update selectedInquiry;
-    
-    // Update Potential AE in DB
-    Case paeUpdate = new Case(
-        Id = selectedInquiry.Id,
-        MICC_Potential_Adverse_Event__c = 'Sent/Faxed to Safety New'
-    );
-    if (selectedInquiry != null && selectedInquiry.Id != null) {
-    selectedInquiry.MICC_Encrypt__c = true;
-    update selectedInquiry;
-
-    f (canOpen === "true" && url && url !== "") {
-    if (miccIsLightningRuntime()) {
-        return navigateLightning(url);
-    }
-    return navigateClassicConsole(url);
-}
+Component.Apex.actionsupport asppeNew = new Component.Apex.actionsupport();
+asppeNew.event = 'onchange';
+asppeNew.onSubmit =
+    'var selValue = this.options[this.selectedIndex].value; ' +
+    'if(selValue === "Sent/Faxed to Safety New"){ ' +
+    '  this.value = ""; ' +
+    '  var btn = document.querySelector("[id*=\'btnPAENew' + String.valueOf(counter) + '\']"); ' +
+    '  if(btn){ btn.click(); } ' +
+    '  return false; ' +
+    '} ' +
+    'return true;';
+PEfld1.childcomponents.add(asppeNew);
