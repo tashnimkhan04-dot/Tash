@@ -106,3 +106,5 @@ In <thead> add after Dose:
 xml<th>Dose Unit</th>
 In <tbody> add after dose:
 xml<td>{!row.doseUnit}</td>
+    <td><apex:input type="number" value="{!row.dose}" styleClass="unifiedTextBox" html-step="0.01"/></td>
+<td><apex:input type="number" value="{!row.frequency}" styleClass="unifiedTextBox" html-step="0.01"/></td>
