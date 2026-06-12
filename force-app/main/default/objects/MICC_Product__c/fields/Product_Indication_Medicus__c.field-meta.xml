@@ -1,19 +1,108 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fullName>Product_Indication_Medicus__c</fullName>
-    <label>Product Indication</label>
-    <required>false</required>
-    <trackTrending>false</trackTrending>
-    <type>MultiselectPicklist</type>
-    <valueSet>
-        <valueSetDefinition>
-            <sorted>false</sorted>
-            <value>
-                <fullName>Indication 1</fullName>
-                <default>false</default>
-                <label>Indication 1</label>
-            </value>
-        </valueSetDefinition>
-    </valueSet>
-    <visibleLines>4</visibleLines>
-</CustomField>
+1. Controller — ProductRow class
+Find public class ProductRow and update these fields:
+javapublic String productType { get; set; }
+public Decimal dose { get; set; }
+public String doseUnit { get; set; }
+public Decimal frequency { get; set; }
+public String route { get; set; }
+
+2. Controller — Add 3 SelectOption methods
+Add before the closing } of the class:
+javapublic List<SelectOption> getProductTypeOptions() {
+    List<SelectOption> options = new List<SelectOption>();
+    options.add(new SelectOption('', '--None--'));
+    options.add(new SelectOption('Suspect', 'Suspect'));
+    options.add(new SelectOption('Concomitant', 'Concomitant'));
+    options.add(new SelectOption('Treatment', 'Treatment'));
+    return options;
+}
+
+public List<SelectOption> getRouteOptions() {
+    List<SelectOption> options = new List<SelectOption>();
+    options.add(new SelectOption('', '--None--'));
+    for (Schema.PicklistEntry e : New_Potential_Adverse_Event__c.Route_of_Administering__c.getDescribe().getPicklistValues()) {
+        options.add(new SelectOption(e.getValue(), e.getLabel()));
+    }
+    return options;
+}
+
+public List<SelectOption> getDoseUnitOptions() {
+    List<SelectOption> options = new List<SelectOption>();
+    options.add(new SelectOption('', '--None--'));
+    for (Schema.PicklistEntry e : New_Potential_Adverse_Event__c.Dose_Unit__c.getDescribe().getPicklistValues()) {
+        options.add(new SelectOption(e.getValue(), e.getLabel()));
+    }
+    return options;
+}
+
+3. Controller — Update JSON serialization block
+Find lines 1584-1609 and replace the entire block:
+javaif (rows != null && !rows.isEmpty()) {
+    adverseEvent.Product_Name__c = rows[0].productName;
+    // Remove Product_Type__c auto-population — user selects from picklist
+    
+    List<Map<String, Object>> productList = new List<Map<String, Object>>();
+    for (ProductRow row : rows) {
+        Map<String, Object> productMap = new Map<String, Object>();
+        productMap.put('srNo', row.srNo);
+        productMap.put('productName', row.productName);
+        productMap.put('productType', row.productType);
+        productMap.put('indication', row.indication);
+        productMap.put('dose', row.dose);
+        productMap.put('doseUnit', row.doseUnit);
+        productMap.put('frequency', row.frequency);
+        productMap.put('route', row.route);
+        productMap.put('lotNumber', row.lotNumber);
+        productMap.put('expiryDate', row.expiryDate != null ? String.valueOf(row.expiryDate) : null);
+        productMap.put('therapyStartDate', row.therapyStartDate != null ? String.valueOf(row.therapyStartDate) : null);
+        productMap.put('therapyEndDate', row.therapyEndDate != null ? String.valueOf(row.therapyEndDate) : null);
+        productMap.put('pickupStatus', row.pickupStatus);
+        productMap.put('technicalComplaint', row.technicalComplaint);
+        productMap.put('technicalComplaintNumber', row.technicalComplaintNumber);
+        productMap.put('technicalComplaintDescription', row.technicalComplaintDescription);
+        productList.add(productMap);
+    }
+    adverseEvent.Product_Info_JSON__c = JSON.serialize(productList);
+}
+
+4. VF Page — Update tbody row
+Find the current tbody inputs and replace only these lines:
+Replace productType inputText:
+xml<td>
+    <apex:selectList value="{!row.productType}" size="1" styleClass="unifiedTextBox">
+        <apex:selectOptions value="{!productTypeOptions}"/>
+    </apex:selectList>
+</td>
+Replace dose inputText:
+xml<td><apex:inputText value="{!row.dose}" styleClass="unifiedTextBox" maxlength="15"/></td>
+Add doseUnit after dose (new column):
+xml<td>
+    <apex:selectList value="{!row.doseUnit}" size="1" styleClass="unifiedTextBox">
+        <apex:selectOptions value="{!doseUnitOptions}"/>
+    </apex:selectList>
+</td>
+Replace frequency inputText:
+xml<td><apex:inputText value="{!row.frequency}" styleClass="unifiedTextBox" maxlength="15"/></td>
+Replace route inputText:
+xml<td>
+    <apex:selectList value="{!row.route}" size="1" styleClass="unifiedTextBox">
+        <apex:selectOptions value="{!routeOptions}"/>
+    </apex:selectList>
+</td>
+
+5. VF Page — Add Dose Unit column header
+Find the thead section and add <th> for Dose Unit after Dose:
+xml<th style="width:45px;">Dose</th>
+<th style="width:70px;">Dose Unit</th>
+
+6. PAE_ProductInfoController — Add doseUnit
+In ProductRow class add:
+javapublic String doseUnit { get; set; }
+In constructor mapping add after row.dose:
+javarow.doseUnit = getStringValue(sourceRow, 'doseUnit');
+
+7. PAE_ProductInfoDisplay — Add Dose Unit column
+In <thead> add after Dose:
+xml<th>Dose Unit</th>
+In <tbody> add after dose:
+xml<td>{!row.doseUnit}</td>
