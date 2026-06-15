@@ -164,7 +164,7 @@ ORDER BY QualifiedApiName ASC
 FROM FieldDefinition 
 WHERE EntityDefinition.QualifiedApiName = 'New_Potential_Adverse_Event__c'
 AND QualifiedApiName = 'Child_Inquiry__c'
-            @isTest
+@isTest
 public static void addNewPAEToMapTest() {
     Test.startTest();
     makeData();
@@ -190,13 +190,10 @@ public static void addNewPAEToMapTest() {
     );
     insert npe2;
     
-    // Cover line 120 - null guard (caseId not in inquiryCaseIds)
-    Case dummy = new Case(Subject = 'dummy');
-    insert dummy;
-    
+    // Same Child_Inquiry__c as npe1 - triggers alreadyExists = true (lines 130-132)
     New_Potential_Adverse_Event__c npe3 = new New_Potential_Adverse_Event__c(
-        Case_PAE__c = dummy.Id,
-        Child_Inquiry__c = dummy.Id,
+        Case_PAE__c = parent.Id,
+        Child_Inquiry__c = child.Id,
         Source_System__c = 'CareConnect',
         Reporting_Date__c = Date.today(),
         Entity__c = 'Novartis'
@@ -208,7 +205,6 @@ public static void addNewPAEToMapTest() {
     Test.setCurrentPage(Page.MICC_InquiryViewPage);
     micc.SelectedCounter = 0;
     
-    micc.getBuildComponent();
     micc.getBuildComponent();
     
     String url = micc.ConsoleIntegrationUrl;
