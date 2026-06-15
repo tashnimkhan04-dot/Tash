@@ -174,13 +174,19 @@ public static void addNewPAEToMapTest() {
     
     New_Potential_Adverse_Event__c npe1 = new New_Potential_Adverse_Event__c(
         Case_PAE__c = parent.Id,
-        Child_Inquiry__c = child.Id
+        Child_Inquiry__c = child.Id,
+        Source_System__c = 'CareConnect',
+        Reporting_Date__c = Date.today(),
+        Entity__c = 'Novartis'
     );
     insert npe1;
     
     New_Potential_Adverse_Event__c npe2 = new New_Potential_Adverse_Event__c(
         Case_PAE__c = parent.Id,
-        Child_Inquiry__c = null
+        Child_Inquiry__c = null,
+        Source_System__c = 'CareConnect',
+        Reporting_Date__c = Date.today(),
+        Entity__c = 'Novartis'
     );
     insert npe2;
     
@@ -197,7 +203,3 @@ public static void addNewPAEToMapTest() {
     
     Test.stopTest();
 }
-            SELECT QualifiedApiName, DataType 
-FROM FieldDefinition 
-WHERE EntityDefinition.QualifiedApiName = 'New_Potential_Adverse_Event__c'
-AND QualifiedApiName IN ('Source_System__c', 'Reporting_Date__c', 'Entity__c')
