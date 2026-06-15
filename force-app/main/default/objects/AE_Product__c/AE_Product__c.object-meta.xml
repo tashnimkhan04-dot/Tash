@@ -154,7 +154,13 @@ asppeNew.onSubmit =
     'return true;';
 PEfld1.childcomponents.add(asppeNew);
 
-    SELECT QualifiedApiName, DataType, IsNillable, Label 
+    SELECT QualifiedApiName, DataType, Label 
 FROM FieldDefinition 
 WHERE EntityDefinition.QualifiedApiName = 'New_Potential_Adverse_Event__c'
-ORDER BY IsNillable ASC
+AND IsNillable = false
+ORDER BY QualifiedApiName ASC
+
+            SELECT QualifiedApiName, DataType, Label, ReferenceTo
+FROM FieldDefinition 
+WHERE EntityDefinition.QualifiedApiName = 'New_Potential_Adverse_Event__c'
+AND QualifiedApiName = 'Child_Inquiry__c'
