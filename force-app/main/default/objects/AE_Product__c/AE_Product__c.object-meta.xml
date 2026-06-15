@@ -197,3 +197,7 @@ public static void addNewPAEToMapTest() {
     
     Test.stopTest();
 }
+            SELECT QualifiedApiName, DataType 
+FROM FieldDefinition 
+WHERE EntityDefinition.QualifiedApiName = 'New_Potential_Adverse_Event__c'
+AND QualifiedApiName IN ('Source_System__c', 'Reporting_Date__c', 'Entity__c')
