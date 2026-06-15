@@ -154,18 +154,7 @@ asppeNew.onSubmit =
     'return true;';
 PEfld1.childcomponents.add(asppeNew);
 
-    function isLightningUi() {
-    // ADD THIS CHECK FIRST
-    try {
-        if (typeof sforce !== 'undefined' && 
-            sforce.console && 
-            typeof sforce.console.isInConsole === 'function') {
-            return false; // definitely Classic Console
-        }
-    } catch(e) {}
-    
-    return window.MICC_UI_THEME &&
-           window.MICC_UI_THEME.indexOf('Theme4') === 0;
-}
-            ParentCaseIdForNewPAE = ApexPages.currentPage()
-                                .getParameters().get('id');
+    SELECT QualifiedApiName, DataType, IsNillable, Label 
+FROM FieldDefinition 
+WHERE EntityDefinition.QualifiedApiName = 'New_Potential_Adverse_Event__c'
+ORDER BY IsNillable ASC
