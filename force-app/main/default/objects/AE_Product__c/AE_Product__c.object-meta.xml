@@ -190,6 +190,19 @@ public static void addNewPAEToMapTest() {
     );
     insert npe2;
     
+    // Cover line 120 - null guard (caseId not in inquiryCaseIds)
+    Case dummy = new Case(Subject = 'dummy');
+    insert dummy;
+    
+    New_Potential_Adverse_Event__c npe3 = new New_Potential_Adverse_Event__c(
+        Case_PAE__c = dummy.Id,
+        Child_Inquiry__c = dummy.Id,
+        Source_System__c = 'CareConnect',
+        Reporting_Date__c = Date.today(),
+        Entity__c = 'Novartis'
+    );
+    insert npe3;
+    
     ApexPages.StandardController sc = new ApexPages.StandardController(parent);
     MICC_InquiryViewController micc = new MICC_InquiryViewController(sc);
     Test.setCurrentPage(Page.MICC_InquiryViewPage);
