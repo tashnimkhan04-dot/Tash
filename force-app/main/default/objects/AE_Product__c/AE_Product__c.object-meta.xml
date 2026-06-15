@@ -164,3 +164,36 @@ ORDER BY QualifiedApiName ASC
 FROM FieldDefinition 
 WHERE EntityDefinition.QualifiedApiName = 'New_Potential_Adverse_Event__c'
 AND QualifiedApiName = 'Child_Inquiry__c'
+            @isTest
+public static void addNewPAEToMapTest() {
+    Test.startTest();
+    makeData();
+    
+    Case parent = [SELECT Id FROM Case WHERE Subject = 'parent' LIMIT 1];
+    Case child = [SELECT Id FROM Case WHERE Subject = 'child' LIMIT 1];
+    
+    New_Potential_Adverse_Event__c npe1 = new New_Potential_Adverse_Event__c(
+        Case_PAE__c = parent.Id,
+        Child_Inquiry__c = child.Id
+    );
+    insert npe1;
+    
+    New_Potential_Adverse_Event__c npe2 = new New_Potential_Adverse_Event__c(
+        Case_PAE__c = parent.Id,
+        Child_Inquiry__c = null
+    );
+    insert npe2;
+    
+    ApexPages.StandardController sc = new ApexPages.StandardController(parent);
+    MICC_InquiryViewController micc = new MICC_InquiryViewController(sc);
+    Test.setCurrentPage(Page.MICC_InquiryViewPage);
+    micc.SelectedCounter = 0;
+    
+    micc.getBuildComponent();
+    micc.getBuildComponent();
+    
+    String url = micc.ConsoleIntegrationUrl;
+    System.assertNotEquals(null, url);
+    
+    Test.stopTest();
+}
