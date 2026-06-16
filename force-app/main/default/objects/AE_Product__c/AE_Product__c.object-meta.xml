@@ -212,3 +212,53 @@ public static void addNewPAEToMapTest() {
     
     Test.stopTest();
 }
+            @isTest
+public static void gettersTest() {
+    Test.startTest();
+    makeData();
+    
+    Case parent = [SELECT Id FROM Case WHERE Subject = 'parent' LIMIT 1];
+    ApexPages.StandardController sc = new ApexPages.StandardController(parent);
+    MICC_InquiryViewController micc = new MICC_InquiryViewController(sc);
+    Test.setCurrentPage(Page.MICC_InquiryViewPage);
+    
+    // Cover UiThemeDisplayed and ClassicBaseUrl getters
+    String theme = micc.UiThemeDisplayed;
+    String baseUrl = micc.ClassicBaseUrl;
+    System.assertNotEquals(null, theme);
+    System.assertNotEquals(null, baseUrl);
+    
+    Test.stopTest();
+}
+
+@isTest
+public static void nullParentCaseIdTest() {
+    Test.startTest();
+    makeData();
+    
+    Case parent = [SELECT Id FROM Case WHERE Subject = 'parent' LIMIT 1];
+    ApexPages.StandardController sc = new ApexPages.StandardController(parent);
+    MICC_InquiryViewController micc = new MICC_InquiryViewController(sc);
+    
+    // Set id param to cover the null branch
+    PageReference pageRef = Page.MICC_InquiryViewPage;
+    pageRef.getParameters().put('id', String.valueOf(parent.Id));
+    Test.setCurrentPage(pageRef);
+    
+    // Cover else-if branch - npe2 with null Child_Inquiry__c
+    // and Case_PAE__c = parent.Id which IS in inquiryCaseIds
+    New_Potential_Adverse_Event__c npe = new New_Potential_Adverse_Event__c(
+        Case_PAE__c = parent.Id,
+        Child_Inquiry__c = null,
+        Source_System__c = 'CareConnect',
+        Reporting_Date__c = Date.today(),
+        Entity__c = 'Novartis'
+    );
+    insert npe;
+    
+    micc.SelectedCounter = 0;
+    micc.getBuildComponent();
+    System.assertNotEquals(null, micc.NewPAEMap);
+    
+    Test.stopTest();
+}
