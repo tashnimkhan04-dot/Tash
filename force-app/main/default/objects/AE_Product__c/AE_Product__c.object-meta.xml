@@ -262,3 +262,263 @@ public static void nullParentCaseIdTest() {
     
     Test.stopTest();
 }
+@isTest
+public class PAE_ProductInfoControllerTest {
+
+    @testSetup
+    static void setupTestData() {
+        // Create test PAE record with Product Info JSON
+        New_Potential_Adverse_Event__c pae = new New_Potential_Adverse_Event__c();
+        pae.Product_Info_JSON__c = JSON.serialize(new List<Map<String, Object>>{
+            new Map<String, Object>{
+                'srNo' => '1',
+                'productName' => 'Adakveo',
+                'productType' => 'Suspect',
+                'indication' => 'Test Indication',
+                'dose' => '10.5',
+                'doseUnit' => 'mg',
+                'frequency' => '2',
+                'route' => 'Oral',
+                'lotNumber' => 'LOT001',
+                'expiryDate' => '2026-12-31',
+                'therapyStartDate' => '2026-01-01',
+                'therapyEndDate' => '2026-06-30',
+                'pickupStatus' => 'Yes',
+                'technicalComplaint' => 'No',
+                'technicalComplaintNumber' => 'TC001',
+                'technicalComplaintDescription' => 'Test description'
+            },
+            new Map<String, Object>{
+                'srNo' => '2',
+                'productName' => 'Test Product',
+                'productType' => 'Concomitant',
+                'indication' => '',
+                'dose' => '',
+                'doseUnit' => '',
+                'frequency' => '',
+                'route' => '',
+                'lotNumber' => '',
+                'expiryDate' => null,
+                'therapyStartDate' => null,
+                'therapyEndDate' => null,
+                'pickupStatus' => 'Unknown',
+                'technicalComplaint' => 'Unknown',
+                'technicalComplaintNumber' => '',
+                'technicalComplaintDescription' => ''
+            }
+        });
+        insert pae;
+    }
+
+    @isTest
+    static void testWithProductData() {
+        New_Potential_Adverse_Event__c pae = [
+            SELECT Id FROM New_Potential_Adverse_Event__c LIMIT 1
+        ];
+
+        Test.startTest();
+        ApexPages.StandardController sc = new ApexPages.StandardController(pae);
+        PAE_ProductInfoController ctrl = new PAE_ProductInfoController(sc);
+        Test.stopTest();
+
+        // Verify rows populated
+        System.assertNotEquals(null, ctrl.productRows);
+        System.assertEquals(2, ctrl.productRows.size());
+
+        // Verify first row values
+        PAE_ProductInfoController.ProductRow row1 = ctrl.productRows[0];
+        System.assertEquals('1', row1.srNo);
+        System.assertEquals('Adakveo', row1.productName);
+        System.assertEquals('Suspect', row1.productType);
+        System.assertEquals('Test Indication', row1.indication);
+        System.assertEquals('10.5', row1.dose);
+        System.assertEquals('mg', row1.doseUnit);
+        System.assertEquals('2', row1.frequency);
+        System.assertEquals('Oral', row1.route);
+        System.assertEquals('LOT001', row1.lotNumber);
+        System.assertEquals('2026-12-31', row1.expiryDate);
+        System.assertEquals('2026-01-01', row1.therapyStartDate);
+        System.assertEquals('2026-06-30', row1.therapyEndDate);
+        System.assertEquals('Yes', row1.pickupStatus);
+        System.assertEquals('No', row1.technicalComplaint);
+        System.assertEquals('TC001', row1.technicalComplaintNumber);
+        System.assertEquals('Test description', row1.technicalComplaintDescription);
+
+        // Verify second row
+        PAE_ProductInfoController.ProductRow row2 = ctrl.productRows[1];
+        System.assertEquals('2', row2.srNo);
+        System.assertEquals('Test Product', row2.productName);
+    }
+
+    @isTest
+    static void testWithEmptyJSON() {
+        // Create PAE with blank JSON
+        New_Potential_Adverse_Event__c pae = new New_Potential_Adverse_Event__c();
+        insert pae;
+
+        Test.startTest();
+        ApexPages.StandardController sc = new ApexPages.StandardController(pae);
+        PAE_ProductInfoController ctrl = new PAE_ProductInfoController(sc);
+        Test.stopTest();
+
+        // Verify empty rows
+        System.assertNotEquals(null, ctrl.productRows);
+        System.assertEquals(0, ctrl.productRows.size());
+    }
+
+    @isTest
+    static void testWithNullProductName() {
+        // Create PAE where both productName and productType are null
+        New_Potential_Adverse_Event__c pae = new New_Potential_Adverse_Event__c();
+        pae.Product_Info_JSON__c = JSON.serialize(new List<Map<String, Object>>{
+            new Map<String, Object>{
+                'srNo' => '1',
+                'productName' => null,
+                'productType' => null,
+                'indication' => null,
+                'dose' => null,
+                'doseUnit' => null,
+                'frequency' => null,
+                'route' => null,
+                'lotNumber' => null,
+                'expiryDate' => null,
+                'therapyStartDate' => null,
+                'therapyEndDate' => null,
+                'pickupStatus' => null,
+                'technicalComplaint' => null,
+                'technicalComplaintNumber' => null,
+                'technicalComplaintDescription' => null
+            }
+        });
+        insert pae;
+
+        Test.startTest();
+        ApexPages.StandardController sc = new ApexPages.StandardController(pae);
+        PAE_ProductInfoController ctrl = new PAE_ProductInfoController(sc);
+        Test.stopTest();
+
+        // Row with null productName and productType should be excluded
+        System.assertEquals(0, ctrl.productRows.size());
+    }
+
+    @isTest
+    static void testWithMissingKeys() {
+        // Create PAE with minimal JSON — missing some keys
+        New_Potential_Adverse_Event__c pae = new New_Potential_Adverse_Event__c();
+        pae.Product_Info_JSON__c = JSON.serialize(new List<Map<String, Object>>{
+            new Map<String, Object>{
+                'productName' => 'MinimalProduct',
+                'productType' => 'Treatment'
+            }
+        });
+        insert pae;
+
+        Test.startTest();
+        ApexPages.StandardController sc = new ApexPages.StandardController(pae);
+        PAE_ProductInfoController ctrl = new PAE_ProductInfoController(sc);
+        Test.stopTest();
+
+        System.assertEquals(1, ctrl.productRows.size());
+        System.assertEquals('MinimalProduct', ctrl.productRows[0].productName);
+        System.assertEquals('Treatment', ctrl.productRows[0].productType);
+        // Missing fields should be empty string
+        System.assertEquals('', ctrl.productRows[0].dose);
+        System.assertEquals('', ctrl.productRows[0].doseUnit);
+    }
+
+    @isTest
+    static void testSrNoFallback() {
+        // Test that srNo falls back to counter when blank
+        New_Potential_Adverse_Event__c pae = new New_Potential_Adverse_Event__c();
+        pae.Product_Info_JSON__c = JSON.serialize(new List<Map<String, Object>>{
+            new Map<String, Object>{
+                'srNo' => '',
+                'productName' => 'Product A',
+                'productType' => 'Suspect'
+            },
+            new Map<String, Object>{
+                'srNo' => '',
+                'productName' => 'Product B',
+                'productType' => 'Concomitant'
+            }
+        });
+        insert pae;
+
+        Test.startTest();
+        ApexPages.StandardController sc = new ApexPages.StandardController(pae);
+        PAE_ProductInfoController ctrl = new PAE_ProductInfoController(sc);
+        Test.stopTest();
+
+        System.assertEquals(2, ctrl.productRows.size());
+        System.assertEquals('1', ctrl.productRows[0].srNo);
+        System.assertEquals('2', ctrl.productRows[1].srNo);
+    }
+
+    @isTest
+    static void testTechnicalComplaintCombination() {
+        // Test technicalComplaint combining number and description when blank
+        New_Potential_Adverse_Event__c pae = new New_Potential_Adverse_Event__c();
+        pae.Product_Info_JSON__c = JSON.serialize(new List<Map<String, Object>>{
+            new Map<String, Object>{
+                'productName' => 'Product A',
+                'productType' => 'Suspect',
+                'technicalComplaint' => '',
+                'technicalComplaintNumber' => 'TC123',
+                'technicalComplaintDescription' => 'Some description'
+            }
+        });
+        insert pae;
+
+        Test.startTest();
+        ApexPages.StandardController sc = new ApexPages.StandardController(pae);
+        PAE_ProductInfoController ctrl = new PAE_ProductInfoController(sc);
+        Test.stopTest();
+
+        System.assertEquals(1, ctrl.productRows.size());
+        System.assertEquals('TC123 - Some description', ctrl.productRows[0].technicalComplaint);
+    }
+
+    @isTest
+    static void testTechnicalComplaintNumberOnly() {
+        New_Potential_Adverse_Event__c pae = new New_Potential_Adverse_Event__c();
+        pae.Product_Info_JSON__c = JSON.serialize(new List<Map<String, Object>>{
+            new Map<String, Object>{
+                'productName' => 'Product A',
+                'productType' => 'Suspect',
+                'technicalComplaint' => '',
+                'technicalComplaintNumber' => 'TC123',
+                'technicalComplaintDescription' => ''
+            }
+        });
+        insert pae;
+
+        Test.startTest();
+        ApexPages.StandardController sc = new ApexPages.StandardController(pae);
+        PAE_ProductInfoController ctrl = new PAE_ProductInfoController(sc);
+        Test.stopTest();
+
+        System.assertEquals('TC123', ctrl.productRows[0].technicalComplaint);
+    }
+
+    @isTest
+    static void testTechnicalComplaintDescriptionOnly() {
+        New_Potential_Adverse_Event__c pae = new New_Potential_Adverse_Event__c();
+        pae.Product_Info_JSON__c = JSON.serialize(new List<Map<String, Object>>{
+            new Map<String, Object>{
+                'productName' => 'Product A',
+                'productType' => 'Suspect',
+                'technicalComplaint' => '',
+                'technicalComplaintNumber' => '',
+                'technicalComplaintDescription' => 'Only description'
+            }
+        });
+        insert pae;
+
+        Test.startTest();
+        ApexPages.StandardController sc = new ApexPages.StandardController(pae);
+        PAE_ProductInfoController ctrl = new PAE_ProductInfoController(sc);
+        Test.stopTest();
+
+        System.assertEquals('Only description', ctrl.productRows[0].technicalComplaint);
+    }
+}
