@@ -530,3 +530,4 @@ public class PAE_ProductInfoControllerTest {
         return res;
     }
 }
+                Test.setMock(HttpCalloutMock.class, new MockHttpResponse());
