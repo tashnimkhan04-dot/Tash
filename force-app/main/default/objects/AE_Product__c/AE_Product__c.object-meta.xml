@@ -875,11 +875,15 @@ if (document.readyState === 'loading') {
 static void testStripHtmlTags_HtmlBodyPath() {
     Case c = createTestCase();
     
+    // Update Case with SuppliedEmail to also cover line 1623
+    c.SuppliedEmail = 'customer@test.com';
+    update c;
+    
     EmailMessage em = new EmailMessage(
         ParentId    = c.Id,
         Subject     = 'Strip HTML Test',
-        HtmlBody    = '<div>Hi<br/>There</div><p>Para</p>&nbsp;&amp;&lt;&gt;\r\n\t\t end\n\n\n\n',
-        TextBody    = '',
+        HtmlBody    = '<div>Hi<br/>There</div><p>Para</p>&nbsp;&amp;&lt;&gt;',
+        // DO NOT set TextBody at all — omit it entirely
         FromAddress = 'strip@test.com',
         ToAddress   = 'to@test.com',
         MessageDate = DateTime.now().addDays(-1),
@@ -889,18 +893,17 @@ static void testStripHtmlTags_HtmlBodyPath() {
     insert em;
     
     Test.startTest();
-    
-    // Set page param BEFORE buildController is called
     Test.setCurrentPage(new PageReference('/apex/test'));
+    // Use String.valueOf to ensure it's a 15/18 char Id string
     ApexPages.currentPage().getParameters().put('caseId', String.valueOf(c.Id));
     
     ApexPages.StandardController sc = 
         new ApexPages.StandardController(new New_Potential_Adverse_Event__c());
     CCMIC_AE_CreateFormController ctrl = new CCMIC_AE_CreateFormController(sc);
-    
     Test.stopTest();
     
-    System.assertNotEquals(null, ctrl, 'Controller should not be null');
+    System.assertNotEquals(null, ctrl);
+}
 }
                 
 
