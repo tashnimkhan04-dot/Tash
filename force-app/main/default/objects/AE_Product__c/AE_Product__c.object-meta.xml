@@ -533,7 +533,7 @@ public class PAE_ProductInfoControllerTest {
                 Test.setMock(HttpCalloutMock.class, new MockHttpResponse());
 
                
-// ----------- 3. Dose & Frequency (optional, must be numeric if filled) -----------
+// ----------- 3. Dose & Frequency -----------
 var numericRegex = /^-?\d+(\.\d+)?$/;
 var hasInvalid   = false;
 var firstInvalid = null;
@@ -543,37 +543,28 @@ if (productTable) {
         var tds = tr.querySelectorAll('td');
         if (tds.length < 7) return;
 
-        var doseInput = tds[4].querySelector('input');
-        var freqInput = tds[6].querySelector('input');
+        var doseInput = tds[4].querySelector('input.numeric-field');
+        var freqInput = tds[6].querySelector('input.numeric-field');
 
-        [{inp: doseInput, label: 'Dose'},
-         {inp: freqInput, label: 'Frequency'}].forEach(function(item) {
-
+        [{inp: doseInput}, {inp: freqInput}].forEach(function(item) {
             var inp = item.inp;
             if (!inp) return;
 
-            // Clear previous state
+            // Always reset first
             inp.classList.remove('is-invalid', 'is-valid');
-            var oldError = inp.nextElementSibling;
-            if (oldError && oldError.classList.contains('field-error')) {
-                oldError.classList.remove('visible');
-            }
+            var errorEl = inp.parentNode.querySelector('.field-error');
+            if (errorEl) errorEl.classList.remove('visible');
 
             var val = (inp.value || '').trim();
+
+            // Empty = skip, no error
             if (val === '') return;
 
             if (!numericRegex.test(val)) {
                 hasInvalid = true;
-
                 inp.classList.add('is-invalid');
-
-                var errorEl = inp.nextElementSibling;
-                if (errorEl && errorEl.classList.contains('field-error')) {
-                    errorEl.classList.add('visible');
-                }
-
+                if (errorEl) errorEl.classList.add('visible');
                 if (!firstInvalid) firstInvalid = inp;
-
             } else {
                 inp.classList.add('is-valid');
             }
@@ -616,6 +607,65 @@ input.is-valid {
             <input type="text" class="numeric-field" ... />
 <span class="field-error">Dose must be numeric</span>
 
+                /* Wrapper on the td must be relative */
+td.numeric-td {
+    position: relative;
+    padding-bottom: 2px;
+}
+
+/* Error floats BELOW input without pushing layout */
+.field-error {
+    display: none;
+    position: absolute;
+    left: 6px;
+    top: 100%;
+    margin-top: 1px;
+    background: #fff0f0;
+    border: 1px solid #c23934;
+    border-radius: 2px;
+    color: #c23934;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 6px;
+    white-space: nowrap;
+    z-index: 999;
+    line-height: 1.4;
+    box-shadow: 0 2px 6px rgba(194,57,52,0.15);
+}
+
+.field-error.visible {
+    display: block;
+}
+
+input.is-invalid {
+    border: 2px solid #c23934 !important;
+    outline: none !important;
+    background-color: #fff8f8 !important;
+}
+
+input.is-valid {
+    border: 1px solid #2e844a !important;
+    outline: none !important;
+    background-color: #f4fdf6 !important;
+}
+
+                <!-- Dose td -->
+<td class="numeric-td">
+    <input type="text" class="numeric-field" data-label="Dose" placeholder="" />
+    <span class="field-error">Dose must be numeric</span>
+</td>
+
+<!-- Frequency td -->
+<td class="numeric-td">
+    <input type="text" class="numeric-field" data-label="Frequency" placeholder="" />
+    <span class="field-error">Frequency must be numeric</span>
+</td>
+// After appending new TR, clear any error state on new row inputs
+newTr.querySelectorAll('input.numeric-field').forEach(function(inp) {
+    inp.classList.remove('is-invalid', 'is-valid');
+    var errorEl = inp.parentNode.querySelector('.field-error');
+    if (errorEl) errorEl.classList.remove('visible');
+});
 
                 
 
