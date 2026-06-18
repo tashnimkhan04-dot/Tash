@@ -532,33 +532,89 @@ public class PAE_ProductInfoControllerTest {
 }
                 Test.setMock(HttpCalloutMock.class, new MockHttpResponse());
 
-                SELECT QualifiedApiName, Label 
-FROM FieldDefinition 
-WHERE EntityDefinition.QualifiedApiName = 'New_Potential_Adverse_Event__c' 
-AND (QualifiedApiName LIKE '%Product%' 
-OR QualifiedApiName LIKE '%Dose%' 
-OR QualifiedApiName LIKE '%Route%' 
-OR QualifiedApiName LIKE '%Frequency%' 
-OR QualifiedApiName LIKE '%Indication%' 
-OR QualifiedApiName LIKE '%Lot%' 
-OR QualifiedApiName LIKE '%Therapy%' 
-OR QualifiedApiName LIKE '%Pickup%' 
-OR QualifiedApiName LIKE '%Technical%')
+               
+// ----------- 3. Dose & Frequency (optional, must be numeric if filled) -----------
+var numericRegex = /^-?\d+(\.\d+)?$/;
+var hasInvalid   = false;
+var firstInvalid = null;
 
-                // Replace the icon approach with inline error text
-var errorDiv = document.createElement('div');
-errorDiv.className = 'errorMessage';
-errorDiv.style.cssText = 
-    'color:#c23934;' +
-    'font-size:11px;' +
-    'margin-top:2px;' +
-    'font-weight:normal;' +
-    'display:block;';
-errorDiv.textContent = item.label + ' must be numeric';
-parentTd.appendChild(errorDiv);
+if (productTable) {
+    productTable.querySelectorAll('tr').forEach(function(tr) {
+        var tds = tr.querySelectorAll('td');
+        if (tds.length < 7) return;
 
-                var oldError = parentTd.querySelector('.errorMessage');
-if (oldError) oldError.remove();
+        var doseInput = tds[4].querySelector('input');
+        var freqInput = tds[6].querySelector('input');
+
+        [{inp: doseInput, label: 'Dose'},
+         {inp: freqInput, label: 'Frequency'}].forEach(function(item) {
+
+            var inp = item.inp;
+            if (!inp) return;
+
+            // Clear previous state
+            inp.classList.remove('is-invalid', 'is-valid');
+            var oldError = inp.nextElementSibling;
+            if (oldError && oldError.classList.contains('field-error')) {
+                oldError.classList.remove('visible');
+            }
+
+            var val = (inp.value || '').trim();
+            if (val === '') return;
+
+            if (!numericRegex.test(val)) {
+                hasInvalid = true;
+
+                inp.classList.add('is-invalid');
+
+                var errorEl = inp.nextElementSibling;
+                if (errorEl && errorEl.classList.contains('field-error')) {
+                    errorEl.classList.add('visible');
+                }
+
+                if (!firstInvalid) firstInvalid = inp;
+
+            } else {
+                inp.classList.add('is-valid');
+            }
+        });
+    });
+}
+
+if (hasInvalid) {
+    if (firstInvalid) firstInvalid.focus();
+    return false;
+}
+
+            /* Inline error text below field */
+.field-error {
+    display: none;
+    color: #c23934;
+    font-size: 10.5px;
+    margin-top: 3px;
+    line-height: 1.3;
+    font-weight: 500;
+}
+.field-error.visible {
+    display: block;
+}
+
+/* Invalid state */
+input.is-invalid {
+    border-color: #c23934 !important;
+    outline: 2px solid #c23934 !important;
+    background-color: #fff8f8 !important;
+}
+
+/* Valid state */
+input.is-valid {
+    border-color: #2e844a !important;
+    outline: none !important;
+    background-color: #f4fdf6 !important;
+}
+
+            <input type="text" class="numeric-field" ... />
+<span class="field-error">Dose must be numeric</span>
 
 
                 
