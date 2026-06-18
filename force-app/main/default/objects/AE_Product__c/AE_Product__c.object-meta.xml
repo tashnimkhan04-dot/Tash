@@ -544,3 +544,18 @@ OR QualifiedApiName LIKE '%Lot%'
 OR QualifiedApiName LIKE '%Therapy%' 
 OR QualifiedApiName LIKE '%Pickup%' 
 OR QualifiedApiName LIKE '%Technical%')
+
+                // Replace the icon approach with inline error text
+var errorDiv = document.createElement('div');
+errorDiv.className = 'errorMessage';
+errorDiv.style.cssText = 
+    'color:#c23934;' +
+    'font-size:11px;' +
+    'margin-top:2px;' +
+    'font-weight:normal;' +
+    'display:block;';
+errorDiv.textContent = item.label + ' must be numeric';
+parentTd.appendChild(errorDiv);
+
+                var oldError = parentTd.querySelector('.errorMessage');
+if (oldError) oldError.remove();
