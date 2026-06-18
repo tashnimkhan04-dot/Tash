@@ -687,30 +687,40 @@ newTr.querySelectorAll('input.numeric-field').forEach(function(inp) {
     });
 }
 
-                .field-error {
+      .field-error {
     display: none;
     position: absolute;
     left: 0;
     top: 100%;
-    margin-top: 1px;
+    margin-top: 2px;
     background: #fff0f0;
     border: 1px solid #c23934;
     border-radius: 2px;
     color: #c23934;
     font-size: 10px;
     font-weight: 600;
-    padding: 2px 6px;
+    padding: 2px 5px;
     white-space: nowrap;
-    width: fit-content;        /* KEY — shrinks to text width */
-    max-width: 160px;          /* safety cap */
-    z-index: 999;
+    width: auto;
+    z-index: 9999;
     line-height: 1.4;
-    box-shadow: 0 2px 4px rgba(194,57,52,0.15);
-    pointer-events: none;      /* won't block clicks on row below */
+    pointer-events: none;
 }
 
 .field-error.visible {
-    display: block;
+    display: inline-block;   /* NOT block — this is the key */
+}
+
+
+                td.numeric-td {
+    position: relative;
+    overflow: visible !important;  /* allow error to spill out */
+    padding-bottom: 2px;
+}
+
+                input.errorInput,
+.unifiedTextBox.errorInput {
+    border: 2px solid red !important;
 }
 
                 
