@@ -805,7 +805,72 @@ newTr.querySelectorAll('input.numeric-field').forEach(function(inp) {
                     html-placeholder=""/>
     <span class="field-error">Frequency must be numeric</span>
 </td>
+// Called on + and - oncomplete — clears ONLY new empty rows, not existing errors
+function clearNumericErrors() {
+    var table = document.querySelector('[id$="productTablePanel"]') || document.body;
+    table.querySelectorAll('input.numeric-field').forEach(function(inp) {
+        var val = (inp.value || '').trim();
+        // Only clear styling if the field is now empty (new row)
+        if (val === '') {
+            inp.classList.remove('is-invalid', 'is-valid');
+            inp.style.border = '';
+            inp.style.backgroundColor = '';
+            inp.style.outline = '';
+            var errorEl = inp.parentNode.querySelector('.field-error');
+            if (errorEl) errorEl.classList.remove('visible');
+        }
+        // If field has value, re-validate it to restore correct state
+        else {
+            validateFieldLive(inp);
+        }
+    });
+    // Re-attach live listeners after every reRender
+    attachAllNumericListeners();
+}
 
+var NUMERIC_REGEX = /^-?\d+(\.\d+)?$/;
+
+function validateFieldLive(inp) {
+    var val = (inp.value || '').trim();
+    var errorEl = inp.parentNode.querySelector('.field-error');
+
+    inp.classList.remove('is-invalid', 'is-valid');
+    if (errorEl) errorEl.classList.remove('visible');
+
+    if (val === '') return;
+
+    if (!NUMERIC_REGEX.test(val)) {
+        inp.classList.add('is-invalid');
+        if (errorEl) errorEl.classList.add('visible');
+    } else {
+        inp.classList.add('is-valid');
+        // Live clear — remove error immediately on valid input
+        inp.style.outline = '';
+    }
+}
+
+function attachAllNumericListeners() {
+    document.querySelectorAll('input.numeric-field').forEach(function(inp) {
+        // Remove old listeners by cloning
+        var newInp = inp.cloneNode(true);
+        inp.parentNode.replaceChild(newInp, inp);
+
+        // Attach fresh listeners
+        newInp.addEventListener('input', function() {
+            validateFieldLive(newInp);
+        });
+        newInp.addEventListener('blur', function() {
+            validateFieldLive(newInp);
+        });
+    });
+}
+
+// Run on page load
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', attachAllNumericListeners);
+} else {
+    attachAllNumericListeners();
+}
                 
 
 
