@@ -906,10 +906,12 @@ static void testStripHtmlTags_HtmlBodyPath() {
 }
 }
 
-<td style="max-width:150px; white-space:normal; word-wrap:break-word; overflow-y:auto; max-height:40px; display:block; border:1px solid #ddd; padding:4px; text-align:center; font-size:10px; background:#fff;">
-    {!row.technicalComplaintNumber}
-    {!IF(AND(NOT(ISBLANK(row.technicalComplaintNumber)), NOT(ISBLANK(row.technicalComplaintDescription))), ' - ', '')}
-    {!row.technicalComplaintDescription}
+<td>
+    <div style="max-height:40px; overflow-y:auto; width:100%;">
+        {!row.technicalComplaintNumber}
+        {!IF(AND(NOT(ISBLANK(row.technicalComplaintNumber)), NOT(ISBLANK(row.technicalComplaintDescription))), ' - ', '')}
+        {!row.technicalComplaintDescription}
+    </div>
 </td>
  
                 
