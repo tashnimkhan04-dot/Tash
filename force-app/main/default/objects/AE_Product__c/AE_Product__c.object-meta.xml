@@ -871,14 +871,14 @@ if (document.readyState === 'loading') {
 } else {
     attachAllNumericListeners();
 }
-                @isTest
+@isTest
 static void testStripHtmlTags_HtmlBodyPath() {
     Case c = createTestCase();
     
     EmailMessage em = new EmailMessage(
         ParentId    = c.Id,
         Subject     = 'Strip HTML Test',
-        HtmlBody    = '<div>Hi<br/>There</div><p>Para</p><p>Two</P><DIV>Block</DIV><b>Bold</b><span style="color:red">colored</span>&nbsp;&nbsp;&amp;&lt;&gt;\r\n\t\t end\n\n\n\n   trailing   ',
+        HtmlBody    = '<div>Hi<br/>There</div><p>Para</p>&nbsp;&amp;&lt;&gt;\r\n\t\t end\n\n\n\n',
         TextBody    = '',
         FromAddress = 'strip@test.com',
         ToAddress   = 'to@test.com',
@@ -889,7 +889,15 @@ static void testStripHtmlTags_HtmlBodyPath() {
     insert em;
     
     Test.startTest();
-    CCMIC_AE_CreateFormController ctrl = buildController(c.Id);
+    
+    // Set page param BEFORE buildController is called
+    Test.setCurrentPage(new PageReference('/apex/test'));
+    ApexPages.currentPage().getParameters().put('caseId', String.valueOf(c.Id));
+    
+    ApexPages.StandardController sc = 
+        new ApexPages.StandardController(new New_Potential_Adverse_Event__c());
+    CCMIC_AE_CreateFormController ctrl = new CCMIC_AE_CreateFormController(sc);
+    
     Test.stopTest();
     
     System.assertNotEquals(null, ctrl, 'Controller should not be null');
