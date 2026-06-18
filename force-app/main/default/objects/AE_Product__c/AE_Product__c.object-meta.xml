@@ -531,3 +531,16 @@ public class PAE_ProductInfoControllerTest {
     }
 }
                 Test.setMock(HttpCalloutMock.class, new MockHttpResponse());
+
+                SELECT QualifiedApiName, Label 
+FROM FieldDefinition 
+WHERE EntityDefinition.QualifiedApiName = 'New_Potential_Adverse_Event__c' 
+AND (QualifiedApiName LIKE '%Product%' 
+OR QualifiedApiName LIKE '%Dose%' 
+OR QualifiedApiName LIKE '%Route%' 
+OR QualifiedApiName LIKE '%Frequency%' 
+OR QualifiedApiName LIKE '%Indication%' 
+OR QualifiedApiName LIKE '%Lot%' 
+OR QualifiedApiName LIKE '%Therapy%' 
+OR QualifiedApiName LIKE '%Pickup%' 
+OR QualifiedApiName LIKE '%Technical%')
