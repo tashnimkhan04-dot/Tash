@@ -907,9 +907,9 @@ static void testStripHtmlTags_HtmlBodyPath() {
 }
 
 <td>
-    <div style="max-height:40px; overflow-y:auto; width:100%;">
+    <div style="max-height:40px; overflow-y:auto; overflow-x:hidden; word-wrap:break-word; white-space:normal; width:120px;">
         {!row.technicalComplaintNumber}
-        {!IF(AND(NOT(ISBLANK(row.technicalComplaintNumber)), NOT(ISBLANK(row.technicalComplaintDescription))), ' - ', '')}
+        <br/>
         {!row.technicalComplaintDescription}
     </div>
 </td>
