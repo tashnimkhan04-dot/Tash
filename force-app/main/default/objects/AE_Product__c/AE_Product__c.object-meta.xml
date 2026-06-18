@@ -905,6 +905,20 @@ static void testStripHtmlTags_HtmlBodyPath() {
     System.assertNotEquals(null, ctrl);
 }
 }
+
+<td style="word-wrap:break-word; max-width:120px; white-space:normal;">
+    <span title="{!row.technicalComplaintNumber} - {!row.technicalComplaintDescription}">
+        {!row.technicalComplaintNumber}
+        <apex:outputText rendered="{!NOT(ISBLANK(row.technicalComplaintDescription))}">
+            <br/>{!row.technicalComplaintDescription}
+        </apex:outputText>
+    </span>
+</td>
+
+                <td style="max-width:150px; max-height:60px; overflow-y:auto; white-space:normal; word-wrap:break-word; display:block;">
+    {!row.technicalComplaintNumber}
+    <br/>{!row.technicalComplaintDescription}
+</td>
                 
 
 
