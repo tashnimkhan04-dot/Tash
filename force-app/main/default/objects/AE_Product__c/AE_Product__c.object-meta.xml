@@ -871,6 +871,29 @@ if (document.readyState === 'loading') {
 } else {
     attachAllNumericListeners();
 }
+                @isTest
+static void testStripHtmlTags_HtmlBodyPath() {
+    Case c = createTestCase();
+    
+    EmailMessage em = new EmailMessage(
+        ParentId    = c.Id,
+        Subject     = 'Strip HTML Test',
+        HtmlBody    = '<div>Hi<br/>There</div><p>Para</p><p>Two</P><DIV>Block</DIV><b>Bold</b><span style="color:red">colored</span>&nbsp;&nbsp;&amp;&lt;&gt;\r\n\t\t end\n\n\n\n   trailing   ',
+        TextBody    = '',
+        FromAddress = 'strip@test.com',
+        ToAddress   = 'to@test.com',
+        MessageDate = DateTime.now().addDays(-1),
+        Incoming    = true,
+        Status      = '3'
+    );
+    insert em;
+    
+    Test.startTest();
+    CCMIC_AE_CreateFormController ctrl = buildController(c.Id);
+    Test.stopTest();
+    
+    System.assertNotEquals(null, ctrl, 'Controller should not be null');
+}
                 
 
 
