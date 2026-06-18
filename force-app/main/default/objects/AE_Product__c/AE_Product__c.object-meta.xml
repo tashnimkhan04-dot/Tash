@@ -667,6 +667,52 @@ newTr.querySelectorAll('input.numeric-field').forEach(function(inp) {
     if (errorEl) errorEl.classList.remove('visible');
 });
 
+                <apex:commandLink action="{!addRow}" reRender="productTablePanel"
+    styleClass="addButton" rendered="{!rows.size < 10}"
+    oncomplete="clearNumericErrors();">
+    <span>+</span>
+</apex:commandLink>
+
+                function clearNumericErrors() {
+    var table = document.getElementById('{!$Component.productTablePanel}')
+                || document.querySelector('[id$="productTablePanel"]');
+    if (!table) return;
+
+    table.querySelectorAll('input.numeric-field').forEach(function(inp) {
+        inp.classList.remove('is-invalid', 'is-valid');
+        inp.style.border = '';
+        inp.style.backgroundColor = '';
+        var errorEl = inp.parentNode.querySelector('.field-error');
+        if (errorEl) errorEl.classList.remove('visible');
+    });
+}
+
+                .field-error {
+    display: none;
+    position: absolute;
+    left: 0;
+    top: 100%;
+    margin-top: 1px;
+    background: #fff0f0;
+    border: 1px solid #c23934;
+    border-radius: 2px;
+    color: #c23934;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 6px;
+    white-space: nowrap;
+    width: fit-content;        /* KEY — shrinks to text width */
+    max-width: 160px;          /* safety cap */
+    z-index: 999;
+    line-height: 1.4;
+    box-shadow: 0 2px 4px rgba(194,57,52,0.15);
+    pointer-events: none;      /* won't block clicks on row below */
+}
+
+.field-error.visible {
+    display: block;
+}
+
                 
 
 
