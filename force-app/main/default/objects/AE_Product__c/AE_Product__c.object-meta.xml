@@ -906,19 +906,48 @@ static void testStripHtmlTags_HtmlBodyPath() {
 }
 }
 
-<td style="word-wrap:break-word; max-width:120px; white-space:normal;">
-    <span title="{!row.technicalComplaintNumber} - {!row.technicalComplaintDescription}">
-        {!row.technicalComplaintNumber}
-        <apex:outputText rendered="{!NOT(ISBLANK(row.technicalComplaintDescription))}">
-            <br/>{!row.technicalComplaintDescription}
-        </apex:outputText>
-    </span>
-</td>
+<thead>
+    <tr>
+        <th style="width:25px;">Sr No</th>
+        <th style="width:80px;">Product</th>
+        <th style="width:70px;">Product Type</th>
+        <th style="width:60px;">Indication</th>
+        <th style="width:40px;">Dose</th>
+        <th style="width:60px;">Dose Unit</th>
+        <th style="width:50px;">Frequency</th>
+        <th style="width:80px;">Route of<br/>Administering</th>
+        <th style="width:50px;">Lot<br/>Number</th>
+        <th style="width:70px;">Expiry Date</th>
+        <th style="width:70px;">Therapy Start<br/>Date</th>
+        <th style="width:70px;">Therapy End<br/>Date</th>
+        <th style="width:70px;">Product<br/>Pickup<br/>Availability<br/>Status</th>
+        <th style="width:80px;">Is this a<br/>Technical<br/>Complaint?</th>
+        <th style="width:120px;">Technical<br/>Complaint</th>
+    </tr>
+</thead>
 
-                <td style="max-width:150px; max-height:60px; overflow-y:auto; white-space:normal; word-wrap:break-word; display:block;">
-    {!row.technicalComplaintNumber}
-    <br/>{!row.technicalComplaintDescription}
-</td>
+                .prodTable th {
+    background: #b7aca4;
+    color: white;
+    padding: 5px 4px;
+    text-align: center;
+    font-size: 10px;
+    border: 1px solid #d58f82;
+    vertical-align: bottom;
+    word-wrap: break-word;
+    white-space: normal;
+}
+
+                .prodTable td {
+    border: 1px solid #ddd;
+    padding: 4px;
+    text-align: center;
+    font-size: 10px;
+    background: #fff;
+    vertical-align: top;
+    word-wrap: break-word;
+    white-space: normal;
+}
                 
 
 
