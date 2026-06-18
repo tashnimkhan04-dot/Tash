@@ -723,6 +723,22 @@ newTr.querySelectorAll('input.numeric-field').forEach(function(inp) {
     border: 2px solid red !important;
 }
 
+                <td class="numeric-td">
+    <apex:inputText value="{!row.dose}" 
+                    styleClass="numeric-field unifiedTextBox"
+                    html-data-label="Dose"
+                    html-placeholder=""/>
+    <span class="field-error">Dose must be numeric</span>
+</td>
+
+                <td class="numeric-td">
+    <apex:inputText value="{!row.frequency}" 
+                    styleClass="numeric-field unifiedTextBox"
+                    html-data-label="Frequency"
+                    html-placeholder=""/>
+    <span class="field-error">Frequency must be numeric</span>
+</td>
+
                 
 
 
