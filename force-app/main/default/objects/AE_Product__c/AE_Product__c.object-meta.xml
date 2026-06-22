@@ -913,6 +913,32 @@ static void testStripHtmlTags_HtmlBodyPath() {
         {!row.technicalComplaintDescription}
     </div>
 </td>
+
+                 var lastNameInput = document.querySelector("input[id*='Reporter_Last_Name']");
+    var isLastNameEmpty = !lastNameInput || lastNameInput.value.trim() === '';
+
+    if (isProductEmpty && isEventDescEmpty && isLastNameEmpty) {
+        alert('Please enter the Product name, Event Description, and Reporter Last Name.');
+        if (productInput) productInput.focus();
+        return false;
+    }
+    if (isProductEmpty) {
+        alert('Please enter the Product name.');
+        if (productInput) productInput.focus();
+        return false;
+    }
+    if (isEventDescEmpty) {
+        alert('Please enter the Event Description.');
+        if (eventDescInput) eventDescInput.focus();
+        return false;
+    }
+    if (isLastNameEmpty) {
+        alert('Please enter the Reporter Last Name.');
+        if (lastNameInput) lastNameInput.focus();
+        return false;
+    }
+}
+The selector input[id*='Reporter_Last_Name'] should work since Salesforce generates IDs containing the field API name. If it doesn't match, inspect the rendered input's actual id in browser devtools and adjust accordingly.
  
                 
 
