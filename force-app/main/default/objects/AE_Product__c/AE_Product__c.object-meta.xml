@@ -972,31 +972,50 @@ function confirmSaveCase() {
     </div>
 </td>
 
-     function revalidateAgeField() {
+      function revalidateAgeField() {
     setTimeout(function() {
-        document.querySelectorAll('.patientAgeCell input').forEach(function(inp) {
-            inp.classList.add('numeric-field');
-            inp.setAttribute('data-label', 'Age');
+        var ageInp = document.querySelector('.patientAgeCell input');
+        if (!ageInp) return;
 
-            var val = (inp.value || '').trim();
+        // Make sure it has the class and label
+        ageInp.classList.add('numeric-field');
+        ageInp.setAttribute('data-label', 'Age');
 
-            // If DOB calculated the age, make it readonly
-            var dobField = document.querySelector('.patientDateInput');
-            if (dobField && (dobField.value || '').trim() !== '') {
-                inp.setAttribute('readonly', 'readonly');
-                inp.style.backgroundColor = '#f4f4f4';
-                inp.style.color = '#666';
-                // Clear any error since it's auto-calculated
-                inp.classList.remove('is-invalid');
-                var errorEl = inp.parentNode.querySelector('.field-error');
+        var dobField = document.querySelector('.patientDateInput');
+        var dobVal = dobField ? (dobField.value || '').trim() : '';
+
+        if (dobVal !== '') {
+            // DOB is set — clear any bad value, set readonly, remove error
+            ageInp.removeAttribute('readonly');        // remove first so we can clear
+            ageInp.value = '';                         // clear bad manually typed value
+            ageInp.removeAttribute('readonly');
+            
+            // Let Apex-rendered value show (it re-renders with correct age)
+            // Just lock it after render settles
+            setTimeout(function() {
+                ageInp.setAttribute('readonly', 'readonly');
+                ageInp.style.backgroundColor = '#f0f0f0';
+                ageInp.style.color = '#555';
+                ageInp.style.cursor = 'not-allowed';
+                ageInp.classList.remove('is-invalid');
+                var errorEl = ageInp.parentNode.querySelector('.field-error');
                 if (errorEl) errorEl.classList.remove('visible');
-            } else {
-                inp.removeAttribute('readonly');
-                inp.style.backgroundColor = '';
-                inp.style.color = '';
-                if (val !== '') validateFieldLive(inp);
-            }
-        });
+                // Also clear Salesforce's native error message if present
+                var sfError = ageInp.closest('.patientAgeCell').querySelector('.errorMsg, .message');
+                if (sfError) sfError.style.display = 'none';
+            }, 50);
+
+        } else {
+            // DOB cleared — make Age editable again
+            ageInp.removeAttribute('readonly');
+            ageInp.style.backgroundColor = '';
+            ageInp.style.color = '';
+            ageInp.style.cursor = '';
+            ageInp.classList.remove('is-invalid');
+            var errorEl = ageInp.parentNode.querySelector('.field-error');
+            if (errorEl) errorEl.classList.remove('visible');
+        }
+
         attachAllNumericListeners();
     }, 150);
 }
