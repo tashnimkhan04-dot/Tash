@@ -914,32 +914,36 @@ static void testStripHtmlTags_HtmlBodyPath() {
     </div>
 </td>
 
-                 var lastNameInput = document.querySelector("input[id*='Reporter_Last_Name']");
-    var isLastNameEmpty = !lastNameInput || lastNameInput.value.trim() === '';
+   <script>
+    // ... your existing functions ...
 
-    if (isProductEmpty && isEventDescEmpty && isLastNameEmpty) {
-        alert('Please enter the Product name, Event Description, and Reporter Last Name.');
-        if (productInput) productInput.focus();
-        return false;
-    }
-    if (isProductEmpty) {
-        alert('Please enter the Product name.');
-        if (productInput) productInput.focus();
-        return false;
-    }
-    if (isEventDescEmpty) {
-        alert('Please enter the Event Description.');
-        if (eventDescInput) eventDescInput.focus();
-        return false;
-    }
-    if (isLastNameEmpty) {
-        alert('Please enter the Reporter Last Name.');
-        if (lastNameInput) lastNameInput.focus();
-        return false;
-    }
-}
-The selector input[id*='Reporter_Last_Name'] should work since Salesforce generates IDs containing the field API name. If it doesn't match, inspect the rendered input's actual id in browser devtools and adjust accordingly.
- 
+    window.addEventListener('load', function() {
+        var lastNameInput = document.querySelector("input[id*='Reporter_Last_Name']");
+        if (lastNameInput) {
+            lastNameInput.removeAttribute('required');
+            lastNameInput.required = true;
+        }
+        
+        var productInput = document.querySelector('.productTable tbody tr:first-child td:nth-child(2) input');
+        if (productInput) {
+            productInput.removeAttribute('required');
+            productInput.required = true;
+        }
+        
+        var eventDescInput = document.querySelector('.fullWidthTextarea');
+        if (eventDescInput) {
+            eventDescInput.removeAttribute('required');
+            eventDescInput.required = true;
+        }
+    });
+</script>
+
+                <apex:commandButton value="Save and Submit Case"
+    action="{!save}"
+    rerender="aeForm"
+    styleClass="btn"
+    onclick="this.disabled=true; this.value='Saving...';"
+    type="submit"/>
                 
 
 
