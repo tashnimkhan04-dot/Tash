@@ -959,13 +959,15 @@ function confirmSaveCase() {
 
     return true;
 }
-
-                <apex:commandButton value="Save and Submit Case"
-    action="{!save}"
-    rerender="aeForm"
-    styleClass="btn"
-    onclick="this.disabled=true; this.value='Saving...';"
-    type="submit"/>
-                document.querySelectorAll('.reporterTextInput').forEach(i => console.log(i.id, i.value))
-
-
+<td class="patientAgeCell">
+    <div class="patientFieldBlock">
+        <span class="patientLabel">Age {!IF($ObjectType.New_Potential_Adverse_Event__c.Fields.Patient_Age__c.nillable, '', '*')}</span>
+        <span class="patientInputWrap" style="position:relative; display:block;">
+            <apex:inputField value="{!adverseEvent.Patient_Age__c}" 
+                             styleClass="patientShortInput numeric-field"
+                             html-data-label="Age"
+                             required="{!NOT($ObjectType.New_Potential_Adverse_Event__c.Fields.Patient_Age__c.nillable)}"/>
+            <span class="field-error">Age must be numeric</span>
+        </span>
+    </div>
+</td>
