@@ -906,37 +906,59 @@ static void testStripHtmlTags_HtmlBodyPath() {
 }
 }
 
-<td>
-    <div style="max-height:40px; overflow-y:auto; overflow-x:hidden; word-wrap:break-word; white-space:normal; width:120px;">
-        {!row.technicalComplaintNumber}
-        <br/>
-        {!row.technicalComplaintDescription}
-    </div>
-</td>
+function confirmSaveCase() {
+    var lastNameInput = document.querySelector("input[id*='Reporter_Last_Name']");
+    var productTable = document.querySelector('.productTable tbody');
+    var firstRow = productTable ? productTable.querySelector('tr:first-child') : null;
+    var productInput = firstRow ? firstRow.querySelectorAll('td')[1].querySelector('input') : null;
+    var eventDescInput = document.querySelector('.fullWidthTextarea');
 
-   <script>
-    // ... your existing functions ...
+    var isLastNameEmpty = !lastNameInput || lastNameInput.value.trim() === '';
+    var isProductEmpty = !productInput || productInput.value.trim() === '';
+    var isEventDescEmpty = !eventDescInput || eventDescInput.value.trim() === '';
 
-    window.addEventListener('load', function() {
-        var lastNameInput = document.querySelector("input[id*='Reporter_Last_Name']");
-        if (lastNameInput) {
-            lastNameInput.removeAttribute('required');
-            lastNameInput.required = true;
-        }
-        
-        var productInput = document.querySelector('.productTable tbody tr:first-child td:nth-child(2) input');
-        if (productInput) {
-            productInput.removeAttribute('required');
-            productInput.required = true;
-        }
-        
-        var eventDescInput = document.querySelector('.fullWidthTextarea');
-        if (eventDescInput) {
-            eventDescInput.removeAttribute('required');
-            eventDescInput.required = true;
-        }
-    });
-</script>
+    // Combined message
+    if (isLastNameEmpty && isProductEmpty && isEventDescEmpty) {
+        alert('Please fill the required fields: Reporter Last Name, Product Name and Event Description.');
+        return false;
+    }
+    if (isLastNameEmpty && isProductEmpty) {
+        alert('Please fill the required fields: Reporter Last Name and Product Name.');
+        return false;
+    }
+    if (isLastNameEmpty && isEventDescEmpty) {
+        alert('Please fill the required fields: Reporter Last Name and Event Description.');
+        return false;
+    }
+    if (isProductEmpty && isEventDescEmpty) {
+        alert('Please fill the required fields: Product Name and Event Description.');
+        return false;
+    }
+
+    // Individual with native tooltip
+    if (isLastNameEmpty) {
+        lastNameInput.setCustomValidity('Please enter the Reporter Last Name.');
+        lastNameInput.reportValidity();
+        return false;
+    }
+    lastNameInput.setCustomValidity('');
+
+    if (isProductEmpty) {
+        productInput.setCustomValidity('Please enter the Product name.');
+        productInput.reportValidity();
+        return false;
+    }
+    productInput.setCustomValidity('');
+
+    if (isEventDescEmpty) {
+        eventDescInput.setCustomValidity('Please enter the Event Description.');
+        eventDescInput.reportValidity();
+        return false;
+    }
+    eventDescInput.setCustomValidity('');
+
+    return true;
+}
 
                 <apex:commandButton value="Save and Submit Case"
     action="{!save}"
