@@ -966,6 +966,6 @@ function confirmSaveCase() {
     styleClass="btn"
     onclick="this.disabled=true; this.value='Saving...';"
     type="submit"/>
-                
+                document.querySelectorAll('.reporterTextInput').forEach(i => console.log(i.id, i.value))
 
 
