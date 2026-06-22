@@ -971,3 +971,29 @@ function confirmSaveCase() {
         </span>
     </div>
 </td>
+
+     function revalidateAgeField() {
+    // Small delay to let DOM settle after reRender
+    setTimeout(function() {
+        var ageInputs = document.querySelectorAll('.numeric-field');
+        ageInputs.forEach(function(inp) {
+            // Find the age field specifically by data-label
+            if (inp.getAttribute('data-label') === 'Age' || 
+                inp.closest('.patientAgeCell')) {
+                var val = (inp.value || '').trim();
+                if (val !== '') {
+                    validateFieldLive(inp);
+                }
+            }
+        });
+        // Also re-attach listeners in case reRender replaced the DOM
+        attachAllNumericListeners();
+    }, 100);
+}
+
+                <apex:inputField value="{!adverseEvent.Patient_Age__c}" 
+                 styleClass="patientShortInput numeric-field"
+                 html-data-label="Age"
+                 html-readonly="{!NOT(ISNULL(patientDOB))}"
+                 required="{!NOT($ObjectType.New_Potential_Adverse_Event__c.Fields.Patient_Age__c.nillable)}"/>
+<span class="field-error">Age must be numeric</span>
