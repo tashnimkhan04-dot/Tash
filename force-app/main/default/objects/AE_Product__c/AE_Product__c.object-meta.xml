@@ -977,45 +977,20 @@ function confirmSaveCase() {
         var ageInp = document.querySelector('.patientAgeCell input');
         if (!ageInp) return;
 
-        // Make sure it has the class and label
-        ageInp.classList.add('numeric-field');
-        ageInp.setAttribute('data-label', 'Age');
+        // Always editable — never readonly
+        ageInp.removeAttribute('readonly');
+        ageInp.style.backgroundColor = '';
+        ageInp.style.color = '';
+        ageInp.style.cursor = '';
 
-        var dobField = document.querySelector('.patientDateInput');
-        var dobVal = dobField ? (dobField.value || '').trim() : '';
+        // Clear any invalid styling and error
+        ageInp.classList.remove('is-invalid');
+        var errorEl = ageInp.parentNode.querySelector('.field-error');
+        if (errorEl) errorEl.classList.remove('visible');
+        ageInp.style.border = '';
+        ageInp.style.outline = '';
 
-        if (dobVal !== '') {
-            // DOB is set — clear any bad value, set readonly, remove error
-            ageInp.removeAttribute('readonly');        // remove first so we can clear
-            ageInp.value = '';                         // clear bad manually typed value
-            ageInp.removeAttribute('readonly');
-            
-            // Let Apex-rendered value show (it re-renders with correct age)
-            // Just lock it after render settles
-            setTimeout(function() {
-                ageInp.setAttribute('readonly', 'readonly');
-                ageInp.style.backgroundColor = '#f0f0f0';
-                ageInp.style.color = '#555';
-                ageInp.style.cursor = 'not-allowed';
-                ageInp.classList.remove('is-invalid');
-                var errorEl = ageInp.parentNode.querySelector('.field-error');
-                if (errorEl) errorEl.classList.remove('visible');
-                // Also clear Salesforce's native error message if present
-                var sfError = ageInp.closest('.patientAgeCell').querySelector('.errorMsg, .message');
-                if (sfError) sfError.style.display = 'none';
-            }, 50);
-
-        } else {
-            // DOB cleared — make Age editable again
-            ageInp.removeAttribute('readonly');
-            ageInp.style.backgroundColor = '';
-            ageInp.style.color = '';
-            ageInp.style.cursor = '';
-            ageInp.classList.remove('is-invalid');
-            var errorEl = ageInp.parentNode.querySelector('.field-error');
-            if (errorEl) errorEl.classList.remove('visible');
-        }
-
+        // Re-attach listeners
         attachAllNumericListeners();
     }, 150);
 }
