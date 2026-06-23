@@ -974,4 +974,22 @@ function confirmSaveCase() {
                      required="{!NOT($ObjectType.New_Potential_Adverse_Event__c.Fields.Patient_Weight__c.nillable)}"/>
     <span class="field-error">Weight must be numeric</span>
 </span>
-      
+      // Height & Weight validation
+document.querySelectorAll('.patientInputWrap input.numeric-field').forEach(function(inp) {
+    // Skip product table fields and age (already handled)
+    if (inp.closest('#productTable') || inp.closest('.patientAgeCell')) return;
+
+    inp.classList.remove('is-invalid');
+    var errEl = inp.parentNode.querySelector('.field-error');
+    if (errEl) errEl.classList.remove('visible');
+
+    var val = (inp.value || '').trim();
+    if (val === '') return;
+
+    if (!numericRegex.test(val)) {
+        hasInvalid = true;
+        inp.classList.add('is-invalid');
+        if (errEl) errEl.classList.add('visible');
+        if (!firstInvalid) firstInvalid = inp;
+    }
+});
