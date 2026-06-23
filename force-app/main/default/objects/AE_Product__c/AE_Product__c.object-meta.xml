@@ -994,8 +994,44 @@ function confirmSaveCase() {
         attachAllNumericListeners();
     }, 150);
 }
+// Line 1257 — already have this:
+adverseEvent.Patient_Age__c = null;
+ageTextValue = null;   // ADD
 
-                <<apex:actionSupport event="onchange"
-                    action="{!handlePatientDOBChange}"
-                    rerender="patientInfoSection,messagePanel"
-                    oncomplete="revalidateAgeField();"/>
+// Line 1282 — already have this:
+adverseEvent.Patient_Age__c = yearValue;
+ageTextValue = String.valueOf(yearValue);   // ADD
+
+// monthValue assignment — already have this:
+adverseEvent.Patient_Age__c = monthValue;
+ageTextValue = String.valueOf(monthValue);  // ADD
+
+// dayValue assignment — already have this:
+adverseEvent.Patient_Age__c = dayValue;
+ageTextValue = String.valueOf(dayValue);    // ADD
+
+                private String ageTextValue;
+public String ageText {
+    get {
+        if (ageTextValue == null && adverseEvent != null 
+            && adverseEvent.Patient_Age__c != null) {
+            ageTextValue = String.valueOf(
+                adverseEvent.Patient_Age__c.intValue()
+            );
+        }
+        return ageTextValue;
+    }
+    set {
+        ageTextValue = value;
+        if (String.isBlank(value)) {
+            adverseEvent.Patient_Age__c = null;
+        } else {
+            try {
+                adverseEvent.Patient_Age__c = Decimal.valueOf(value.trim());
+            } catch (Exception e) {
+                adverseEvent.Patient_Age__c = null;
+                ageTextValue = '';
+            }
+        }
+    }
+}
