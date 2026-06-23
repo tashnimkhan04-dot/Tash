@@ -959,79 +959,19 @@ function confirmSaveCase() {
 
     return true;
 }
-<td class="patientAgeCell">
-    <div class="patientFieldBlock">
-        <span class="patientLabel">Age {!IF($ObjectType.New_Potential_Adverse_Event__c.Fields.Patient_Age__c.nillable, '', '*')}</span>
-        <span class="patientInputWrap" style="position:relative; display:block;">
-            <apex:inputField value="{!adverseEvent.Patient_Age__c}" 
-                             styleClass="patientShortInput numeric-field"
-                             html-data-label="Age"
-                             required="{!NOT($ObjectType.New_Potential_Adverse_Event__c.Fields.Patient_Age__c.nillable)}"/>
-            <span class="field-error">Age must be numeric</span>
-        </span>
-    </div>
-</td>
+<span class="patientInputWrap" style="position:relative; display:block;">
+    <apex:inputField value="{!adverseEvent.Patient_Height__c}" 
+                     styleClass="patientShortInput numeric-field"
+                     html-data-label="Height"
+                     required="{!NOT($ObjectType.New_Potential_Adverse_Event__c.Fields.Patient_Height__c.nillable)}"/>
+    <span class="field-error">Height must be numeric</span>
+</span>
 
-      function revalidateAgeField() {
-    setTimeout(function() {
-        var ageInp = document.querySelector('.patientAgeCell input');
-        if (!ageInp) return;
-
-        // Always editable — never readonly
-        ageInp.removeAttribute('readonly');
-        ageInp.style.backgroundColor = '';
-        ageInp.style.color = '';
-        ageInp.style.cursor = '';
-
-        // Clear any invalid styling and error
-        ageInp.classList.remove('is-invalid');
-        var errorEl = ageInp.parentNode.querySelector('.field-error');
-        if (errorEl) errorEl.classList.remove('visible');
-        ageInp.style.border = '';
-        ageInp.style.outline = '';
-
-        // Re-attach listeners
-        attachAllNumericListeners();
-    }, 150);
-}
-// Line 1257 — already have this:
-adverseEvent.Patient_Age__c = null;
-ageTextValue = null;   // ADD
-
-// Line 1282 — already have this:
-adverseEvent.Patient_Age__c = yearValue;
-ageTextValue = String.valueOf(yearValue);   // ADD
-
-// monthValue assignment — already have this:
-adverseEvent.Patient_Age__c = monthValue;
-ageTextValue = String.valueOf(monthValue);  // ADD
-
-// dayValue assignment — already have this:
-adverseEvent.Patient_Age__c = dayValue;
-ageTextValue = String.valueOf(dayValue);    // ADD
-
-                private String ageTextValue;
-public String ageText {
-    get {
-        if (ageTextValue == null && adverseEvent != null 
-            && adverseEvent.Patient_Age__c != null) {
-            ageTextValue = String.valueOf(
-                adverseEvent.Patient_Age__c.intValue()
-            );
-        }
-        return ageTextValue;
-    }
-    set {
-        ageTextValue = value;
-        if (String.isBlank(value)) {
-            adverseEvent.Patient_Age__c = null;
-        } else {
-            try {
-                adverseEvent.Patient_Age__c = Decimal.valueOf(value.trim());
-            } catch (Exception e) {
-                adverseEvent.Patient_Age__c = null;
-                ageTextValue = '';
-            }
-        }
-    }
-}
+ <span class="patientInputWrap" style="position:relative; display:block;">
+    <apex:inputField value="{!adverseEvent.Patient_Weight__c}" 
+                     styleClass="patientShortInput numeric-field"
+                     html-data-label="Weight"
+                     required="{!NOT($ObjectType.New_Potential_Adverse_Event__c.Fields.Patient_Weight__c.nillable)}"/>
+    <span class="field-error">Weight must be numeric</span>
+</span>
+      
