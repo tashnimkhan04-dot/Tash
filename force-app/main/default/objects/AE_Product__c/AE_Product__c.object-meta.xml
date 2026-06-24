@@ -959,6 +959,20 @@ function confirmSaveCase() {
 
     return true;
 }
+                RecordTypeId,ParentId,Status,IsVisibleInSelfService,Priority,Description,OwnerId,Product__c
+012A00000019SEeIAM,500WD00000d9bjUYAQ,Open,true,Medium,Adverse Event reported,005WD00000T2dCyYAJ,Arcapta
+012A00000019SEeIAM,500WD00000d9bjVYAQ,Open,true,Medium,Adverse Event reported,005WD00000T2dCyYAJ,Arcapta
+012A00000019SEeIAM,500WD00000d9bjWYAQ,Open,true,Medium,Adverse Event reported,005WD00000T2dCyYAJ,Arcapta
+012A00000019SEeIAM,500WD00000d9bjXYAQ,Open,true,Medium,Adverse Event reported,005WD00000T2dCyYAJ,Arcapta
+012A00000019SEeIAM,500WD00000d9bjYYAQ,Open,true,Medium,Adverse Event reported,005WD00000T2dCyYAJ,Arcapta
+012A00000019SEeIAM,500WD00000d9bjZYAQ,Open,true,Medium,Adverse Event reported,005WD00000T2dCyYAJ,Cosentyx
+012A00000019SEeIAM,500WD00000d9bjaYAA,Open,true,Medium,Adverse Event reported,005WD00000T2dCyYAJ,Cosentyx
+012A00000019SEeIAM,500WD00000d9bjbYAA,Open,true,Medium,Adverse Event reported,005WD00000T2dCyYAJ,Cosentyx
+012A00000019SEeIAM,500WD00000d9bjcYAA,Open,true,Medium,Adverse Event reported,005WD00000T2dCyYAJ,Cosentyx
+012A00000019SEeIAM,500WD00000d9bjdYAA,Open,true,Medium,Adverse Event reported,005WD00000T2dCyYAJ,Cosentyx
+
+
+                
 RecordTypeId,Status,IsVisibleInSelfService,Priority,Description,OwnerId,Product__c,MICC_Address_Line_1__c,MICC_Address_Line_2__c,MICC_City__c,MICC_Closed_on_First_Call__c,MICC_Customer_Title__c,MICC_Customer_Type__c,MICC_Degree__c,MICC_Email_Case__c,MICC_Email__c,MICC_Employee_Email__c,MICC_Employee_Job_Title__c,MICC_Encrypt__c,MICC_Fax__c,MICC_First_Name__c,MICC_Fulfill__c,MICC_Gender__c,MICC_Inquiry_For__c,MICC_Inquiry_Status__c,MICC_Inquiry_Text__c,MICC_Inquiry_Type__c,MICC_Inquiry__c,MICC_Insight__c,MICC_Last_Name__c,MICC_Media_Type__c,MICC_Message_To_Field_Medical__c,MICC_Middle_Name__c,MICC_Mobile__c,MICC_Name__c,MICC_Notes__c,MICC_Org_name__c,MICC_Phone__c,MICC_Salutation__c,MICC_Urgent__c,MICC_Source__c,MICC_State__c,MICC_Zip_Code__c,MICC_Phone_Extn__c,MICC_Title__c,MICC_Twitter_Id__c,MICC_Skill_Code__c,MICC_CITY_Restore__c,MICC_EMAIL_Restore__c,NPI_No__c,MICC_Restore_First_Name__c,MICC_Restore_Last_Name__c,MICC_Restore_Email__c,MICC_SALUTION_Restore__c,MICC_Restore_Address_Line_1__c,MICC_Restore_Address_Line_2__c,MICC_Restore_City__c,MICC_Restore_State__c,MICC_Restore_Fax__c,MICC_Restore_Phone__c,MICC_Restore_Zip__c,MICC_Restore_Twitter_Id__c,MICC_Restore_Gender__c
 012A00000019SEaIAM,Open,true,Medium,Product inquiry,005WD00000T2dCyYAJ,Arcapta,221B Baker Street,Apt 1,Mumbai,false,Mr,Consumer,MD,false,tashnim.kausar_ext@novartis.com,tashnim.kausar_ext@novartis.com,Sales Rep,false,9876543210,Rahul,false,M,Self,Open,Patient had reaction to medication,Product Inquiry,,insight1,Sharma,Telephone,HCP requested Field Medical visit.,,9876543210,Mr.,Mumbai,novartis1,9876543210,Mr.,false,Telephone,MH,400001,101,test@gmail.com,@rahul_t,SKU001,Mumbai,tashnim.kausar_ext@novartis.com,,Rahul,Sharma,tashnim.kausar_ext@novartis.com,Mr.,221B Baker Street,Apt 1,Mumbai,MH,,9876543210,400001,,M
 012A00000019SEaIAM,Open,true,High,Product inquiry,005WD00000T2dCyYAJ,Arcapta,45 MG Road,Suite 2,Delhi,false,Ms,HCP,MBBS,false,tashnim.kausar_ext@novartis.com,tashnim.kausar_ext@novartis.com,Medical Officer,false,9876543211,Priya,false,F,Someone Else,Open,Patient reported dizziness,Product Inquiry,,insight2,Mehta,Email,Doctor requested sample kit.,,9876543211,Ms.,Delhi,novartis2,9876543211,Ms.,false,Email,DL,110001,102,test2@gmail.com,@priya_m,SKU002,Delhi,tashnim.kausar_ext@novartis.com,,Priya,Mehta,tashnim.kausar_ext@novartis.com,Ms.,45 MG Road,Suite 2,Delhi,DL,,9876543211,110001,,F
