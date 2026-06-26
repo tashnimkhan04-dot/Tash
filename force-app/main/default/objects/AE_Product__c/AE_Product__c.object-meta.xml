@@ -1051,68 +1051,34 @@ json{
     "Visibility": "AllUsers"
 }
 
-                List<String> caseIds = new List<String>{
-    '500CASE_ID_1',
-    '500CASE_ID_2',
-    '500CASE_ID_3'
+Only Option Now — REST Explorer
+Since Execute Anonymous has a hard 32KB limit, for a 304KB PDF you have to use REST Explorer. No way around it.
+Go back to the REST Explorer approach but use the Attachment object instead of ContentVersion so you get the classic preview:
+Step 1: Get just the raw base64 from console:
+jsconst input = document.createElement('input');
+input.type = 'file';
+input.accept = '.pdf';
+input.onchange = e => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+        const b64 = ev.target.result.split('base64,')[1];
+        navigator.clipboard.writeText(b64)
+            .then(() => console.log('✅ Copied!'))
+            .catch(() => console.log(b64)); // prints if clipboard fails
+    };
+    reader.readAsDataURL(e.target.files[0]);
 };
+input.click();
+Step 2: REST Explorer — POST once per Case:
 
-// Your base64 string
-String b64 = 'PASTE_YOUR_BASE64_HERE';
+Method: POST
+URL: /services/data/v59.0/sobjects/Attachment
+Body:
 
-List<Attachment> attachments = new List<Attachment>();
-for (String cId : caseIds) {
-    Attachment att = new Attachment();
-    att.Name = 'Adverse_Event_Attachment_Test.pdf';
-    att.Body = EncodingUtil.base64Decode(b64);
-    att.ParentId = cId;
-    att.ContentType = 'application/pdf';
-    attachments.add(att);
+json{
+    "Name": "Adverse_Event_Attachment_Test.pdf",
+    "Body": "PASTE_BASE64_HERE",
+    "ParentId": "500CASE_ID_HERE",
+    "ContentType": "application/pdf"
 }
-
-insert attachments;
-System.debug('Inserted ' + attachments.size() + ' attachments successfully');
-
-    (function() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.pdf';
-    input.style.display = 'none';
-    document.body.appendChild(input);
-    
-    input.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        const reader = new FileReader();
-        
-        reader.addEventListener('load', function(ev) {
-            const b64 = ev.target.result.split('base64,')[1];
-            const chunkSize = 20000;
-            let apexLines = '';
-            let partNames = [];
-            let partNum = 1;
-            
-            for (let i = 0; i < b64.length; i += chunkSize) {
-                const chunk = b64.slice(i, i + chunkSize);
-                apexLines += `String part${partNum} = '${chunk}';\n`;
-                partNames.push(`part${partNum}`);
-                partNum++;
-            }
-            
-            apexLines += `\nString b64 = ${partNames.join(' + ')};\n`;
-            
-            // Print full output
-            console.log('======= COPY FROM HERE =======');
-            console.log(apexLines);
-            console.log('======= END =======');
-            
-            // Also try clipboard
-            navigator.clipboard.writeText(apexLines)
-                .then(() => console.log('✅ Copied to clipboard!'))
-                .catch(() => console.log('❌ Clipboard failed — copy manually from above'));
-        });
-        
-        reader.readAsDataURL(file);
-    });
-    
-    input.click();
-})();
+Repeat Step 2 for each Case ID — just change ParentId each time. No character limit issue in REST Explorer.
