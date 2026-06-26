@@ -960,57 +960,93 @@ function confirmSaveCase() {
     return true;
 }
 
-// If you have the PDF as a file input, use this:
-function pdfToApex(file) {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const b64 = e.target.result.split('base64,')[1];
-        generateApex(b64);
-    };
-    reader.readAsDataURL(file);
-}
-
-function generateApex(b64) {
-    const chunkSize = 20000;
-    const chunks = [];
-    for (let i = 0; i < b64.length; i += chunkSize) {
-        chunks.push(b64.slice(i, i + chunkSize));
-    }
-
-    let apex = `String part1 = '${chunks[0]}';\n`;
-    for (let i = 1; i < chunks.length; i++) {
-        apex += `String part${i+1} = '${chunks[i]}';\n`;
-    }
-
-    apex += `\nString full = ` + chunks.map((_, i) => `part${i+1}`).join(' + ') + `;\n\n`;
-
-    apex += `ContentVersion cv = new ContentVersion();
-cv.Title = 'TestFile';
-cv.PathOnClient = 'TestFile.pdf';
-cv.VersionData = EncodingUtil.base64Decode(full);
-cv.IsMajorVersion = true;
-insert cv;
-
-String docId = [SELECT ContentDocumentId FROM ContentVersion WHERE Id = :cv.Id].ContentDocumentId;
-
-ContentDocumentLink cdl = new ContentDocumentLink();
-cdl.ContentDocumentId = docId;
-cdl.LinkedEntityId = 'YOUR_CASE_ID_HERE';
-cdl.ShareType = 'V';
-cdl.Visibility = 'AllUsers';
-insert cdl;
-
-System.debug('Done — DocId: ' + docId);`;
-
-    console.log(apex);
-    copy(apex); // auto copies to clipboard
-    console.log('✅ Apex copied to clipboard! Paste in Execute Anonymous.');
-}
-
-// ---- TRIGGER IT ----
-// Create a file input and pick your PDF
-const input = document.createElement('input');
+Step 1: Get Base64 of your PDF
+Open browser console (F12) and run:
+jsconst input = document.createElement('input');
 input.type = 'file';
 input.accept = '.pdf';
-input.onchange = e => pdfToApex(e.target.files[0]);
+input.onchange = e => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+        const b64 = ev.target.result.split('base64,')[1];
+        copy(b64);
+        console.log('✅ Base64 copied to clipboard!');
+    };
+    reader.readAsDataURL(e.target.files[0]);
+};
 input.click();
+Pick your PDF → base64 auto copied to clipboard.
+
+Step 2: Upload File via REST Explorer
+Open Salesforce Inspector → REST Explorer
+Set:
+
+Method: POST
+URL: /services/data/v59.0/sobjects/ContentVersion
+Body:
+
+json{
+    "Title": "TestFile",
+    "PathOnClient": "TestFile.pdf",
+    "VersionData": "PASTE_BASE64_HERE",
+    "IsMajorVersion": true
+}
+Hit Send → you'll get back a response like:
+json{
+    "id": "068XXXXXXXXXXXXXXX",
+    "success": true
+}
+Copy that id — this is your ContentVersion Id.
+
+Step 3: Get ContentDocumentId
+In REST Explorer:
+
+Method: GET
+URL: /services/data/v59.0/sobjects/ContentVersion/068XXXXXXXXXXXXXXX?fields=ContentDocumentId
+
+Response:
+json{
+    "ContentDocumentId": "069XXXXXXXXXXXXXXX"
+}
+Copy the ContentDocumentId.
+
+Step 4: Link to Case
+
+Method: POST
+URL: /services/data/v59.0/sobjects/ContentDocumentLink
+Body:
+
+json{
+    "ContentDocumentId": "069XXXXXXXXXXXXXXX",
+    "LinkedEntityId": "500XXXXXXXXXXXXXXX",
+    "ShareType": "V",
+    "Visibility": "AllUsers"
+}
+Hit Send → done. Go check your Case, PDF will be in Files section.
+
+
+Multiple Cases — Step by Step
+Steps 1, 2, 3 are exactly the same — upload the file once and get the ContentDocumentId.
+Only Step 4 changes — repeat the ContentDocumentLink POST for each Case:
+
+Step 4a: Link to Case 1
+
+Method: POST
+URL: /services/data/v59.0/sobjects/ContentDocumentLink
+Body:
+
+json{
+    "ContentDocumentId": "069XXXXXXXXXXXXXXX",
+    "LinkedEntityId": "500CASE_ID_1",
+    "ShareType": "V",
+    "Visibility": "AllUsers"
+}
+
+Step 4b: Link to Case 2
+Same POST, just change LinkedEntityId:
+json{
+    "ContentDocumentId": "069XXXXXXXXXXXXXXX",
+    "LinkedEntityId": "500CASE_ID_2",
+    "ShareType": "V",
+    "Visibility": "AllUsers"
+}
