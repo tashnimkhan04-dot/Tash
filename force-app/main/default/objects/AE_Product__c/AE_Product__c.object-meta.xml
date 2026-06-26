@@ -960,9 +960,57 @@ function confirmSaveCase() {
     return true;
 }
 
-<td>
-    <apex:outputText value="{!row.productType}" rendered="{!row.srNo == 1}" styleClass="unifiedTextBox"/>
-    <apex:selectList value="{!row.productType}" size="1" styleClass="unifiedTextBox" rendered="{!row.srNo != 1}">
-        <apex:selectOptions value="{!productTypeOptions}"/>
-    </apex:selectList>
-</td>
+// If you have the PDF as a file input, use this:
+function pdfToApex(file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const b64 = e.target.result.split('base64,')[1];
+        generateApex(b64);
+    };
+    reader.readAsDataURL(file);
+}
+
+function generateApex(b64) {
+    const chunkSize = 20000;
+    const chunks = [];
+    for (let i = 0; i < b64.length; i += chunkSize) {
+        chunks.push(b64.slice(i, i + chunkSize));
+    }
+
+    let apex = `String part1 = '${chunks[0]}';\n`;
+    for (let i = 1; i < chunks.length; i++) {
+        apex += `String part${i+1} = '${chunks[i]}';\n`;
+    }
+
+    apex += `\nString full = ` + chunks.map((_, i) => `part${i+1}`).join(' + ') + `;\n\n`;
+
+    apex += `ContentVersion cv = new ContentVersion();
+cv.Title = 'TestFile';
+cv.PathOnClient = 'TestFile.pdf';
+cv.VersionData = EncodingUtil.base64Decode(full);
+cv.IsMajorVersion = true;
+insert cv;
+
+String docId = [SELECT ContentDocumentId FROM ContentVersion WHERE Id = :cv.Id].ContentDocumentId;
+
+ContentDocumentLink cdl = new ContentDocumentLink();
+cdl.ContentDocumentId = docId;
+cdl.LinkedEntityId = 'YOUR_CASE_ID_HERE';
+cdl.ShareType = 'V';
+cdl.Visibility = 'AllUsers';
+insert cdl;
+
+System.debug('Done — DocId: ' + docId);`;
+
+    console.log(apex);
+    copy(apex); // auto copies to clipboard
+    console.log('✅ Apex copied to clipboard! Paste in Execute Anonymous.');
+}
+
+// ---- TRIGGER IT ----
+// Create a file input and pick your PDF
+const input = document.createElement('input');
+input.type = 'file';
+input.accept = '.pdf';
+input.onchange = e => pdfToApex(e.target.files[0]);
+input.click();
