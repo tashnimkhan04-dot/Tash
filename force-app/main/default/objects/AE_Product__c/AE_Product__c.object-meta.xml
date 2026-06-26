@@ -1082,28 +1082,37 @@ json{
     "ContentType": "application/pdf"
 }
 {
-    "allOrNone": true,
-    "records": [
+    "haltOnError": true,
+    "batchRequests": [
         {
-            "attributes": {"type": "Attachment"},
-            "Name": "Adverse_Event_Attachment_Test.pdf",
-            "Body": "PASTE_BASE64_HERE",
-            "ParentId": "500CASE_ID_1",
-            "ContentType": "application/pdf"
+            "method": "POST",
+            "url": "/services/data/v59.0/sobjects/Attachment",
+            "richInput": {
+                "Name": "Adverse_Event_Attachment_Test.pdf",
+                "Body": "PASTE_BASE64_HERE",
+                "ParentId": "500CASE_ID_1",
+                "ContentType": "application/pdf"
+            }
         },
         {
-            "attributes": {"type": "Attachment"},
-            "Name": "Adverse_Event_Attachment_Test.pdf",
-            "Body": "PASTE_BASE64_HERE",
-            "ParentId": "500CASE_ID_2",
-            "ContentType": "application/pdf"
+            "method": "POST",
+            "url": "/services/data/v59.0/sobjects/Attachment",
+            "richInput": {
+                "Name": "Adverse_Event_Attachment_Test.pdf",
+                "Body": "PASTE_BASE64_HERE",
+                "ParentId": "500CASE_ID_2",
+                "ContentType": "application/pdf"
+            }
         },
         {
-            "attributes": {"type": "Attachment"},
-            "Name": "Adverse_Event_Attachment_Test.pdf",
-            "Body": "PASTE_BASE64_HERE",
-            "ParentId": "500CASE_ID_3",
-            "ContentType": "application/pdf"
+            "method": "POST",
+            "url": "/services/data/v59.0/sobjects/Attachment",
+            "richInput": {
+                "Name": "Adverse_Event_Attachment_Test.pdf",
+                "Body": "PASTE_BASE64_HERE",
+                "ParentId": "500CASE_ID_3",
+                "ContentType": "application/pdf"
+            }
         }
     ]
 }
