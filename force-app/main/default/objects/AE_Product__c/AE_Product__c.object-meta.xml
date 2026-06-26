@@ -1082,7 +1082,6 @@ json{
     "ContentType": "application/pdf"
 }
 {
-    "haltOnError": true,
     "batchRequests": [
         {
             "method": "POST",
