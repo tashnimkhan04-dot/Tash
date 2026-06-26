@@ -1115,3 +1115,10 @@ json{
         }
     ]
 }
+                {
+    "Title": "Your_Image",
+    "PathOnClient": "Your_Image.png",
+    "VersionData": "PASTE_BASE64_HERE",
+    "IsMajorVersion": true,
+    "FirstPublishLocationId": "500XXXXXXXXXXXXXXX"
+}
