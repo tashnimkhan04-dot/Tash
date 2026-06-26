@@ -1050,3 +1050,47 @@ json{
     "ShareType": "V",
     "Visibility": "AllUsers"
 }
+
+                List<String> caseIds = new List<String>{
+    '500CASE_ID_1',
+    '500CASE_ID_2',
+    '500CASE_ID_3'
+};
+
+// Your base64 string
+String b64 = 'PASTE_YOUR_BASE64_HERE';
+
+List<Attachment> attachments = new List<Attachment>();
+for (String cId : caseIds) {
+    Attachment att = new Attachment();
+    att.Name = 'Adverse_Event_Attachment_Test.pdf';
+    att.Body = EncodingUtil.base64Decode(b64);
+    att.ParentId = cId;
+    att.ContentType = 'application/pdf';
+    attachments.add(att);
+}
+
+insert attachments;
+System.debug('Inserted ' + attachments.size() + ' attachments successfully');
+
+    const input = document.createElement('input');
+input.type = 'file';
+input.accept = '.pdf';
+input.onchange = e => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+        const b64 = ev.target.result.split('base64,')[1];
+        const chunkSize = 20000;
+        let parts = [];
+        let apexLines = '';
+        for (let i = 0; i < b64.length; i += chunkSize) {
+            parts.push(`part${parts.length + 1}`);
+            apexLines += `String part${parts.length} = '${b64.slice(i, i + chunkSize)}';\n`;
+        }
+        apexLines += `String b64 = ${parts.join(' + ')};\n`;
+        copy(apexLines);
+        console.log('✅ Copied! Paste at top of your Apex script');
+    };
+    reader.readAsDataURL(e.target.files[0]);
+};
+input.click();
