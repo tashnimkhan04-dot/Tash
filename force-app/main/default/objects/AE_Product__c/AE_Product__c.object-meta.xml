@@ -1115,10 +1115,51 @@ json{
         }
     ]
 }
-                {
-    "Title": "Your_Image",
-    "PathOnClient": "Your_Image.png",
-    "VersionData": "PASTE_BASE64_HERE",
-    "IsMajorVersion": true,
-    "FirstPublishLocationId": "500XXXXXXXXXXXXXXX"
+   New_Potential_Adverse_Event__c ae = [
+    SELECT Id, Patient_DOB__c, Patient_Age__c, Patient_Age_Unit__c
+    FROM New_Potential_Adverse_Event__c
+    WHERE Patient_Age__c = 0
+    ORDER BY CreatedDate DESC
+    LIMIT 5
+];
+System.debug(ae);
+
+                // Simulate a fresh form load and inspect what the DOB defaults to
+CCMIC_AE_CreateFormController ctrl;
+
+// If your controller needs a StandardController, adjust this setup accordingly.
+// This is a simplified direct test of the age calculation logic itself:
+
+New_Potential_Adverse_Event__c ae = new New_Potential_Adverse_Event__c();
+
+System.debug('=== Fresh record, before anything set ===');
+System.debug('Patient_DOB__c: ' + ae.Patient_DOB__c);
+System.debug('Patient_Age__c: ' + ae.Patient_Age__c);
+
+// Now test the age calc logic directly with what patientDOBValue might actually be
+Date patientDOBValue = ae.Patient_DOB__c; // should be null on a fresh record
+
+if (patientDOBValue == null) {
+    System.debug('DOB is null as expected - age should stay null');
+} else {
+    System.debug('DOB is NOT null: ' + patientDOBValue + ' — this is likely your bug');
 }
+
+// Now explicitly test what happens if DOB somehow equals today (the suspected bug)
+Date todayDate = Date.today();
+Date testDOB = todayDate; // simulate the suspected default
+
+Integer yearValue = todayDate.year() - testDOB.year();
+Date birthdayThisYear = Date.newInstance(
+    todayDate.year(),
+    testDOB.month(),
+    Math.min(testDOB.day(), Date.daysInMonth(todayDate.year(), testDOB.month()))
+);
+if (birthdayThisYear > todayDate) {
+    yearValue--;
+}
+System.debug('If DOB = today, yearValue would be: ' + yearValue);
+
+Integer dayValue = testDOB.daysBetween(todayDate);
+System.debug('If DOB = today, dayValue (final fallback) would be: ' + dayValue);
+System.debug('This dayValue of 0 is what gets written to Patient_Age__c — confirming the bug pattern');
