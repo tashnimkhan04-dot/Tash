@@ -1115,14 +1115,26 @@ json{
         }
     ]
 }
-   New_Potential_Adverse_Event__c ae = [
-    SELECT Id, Patient_DOB__c, Patient_Age__c, Patient_Age_Unit__c
+   List<New_Potential_Adverse_Event__c> records = [
+    SELECT Id, Name, Patient_DOB__c, Patient_Age__c, Patient_Age_Unit__c, CreatedDate
     FROM New_Potential_Adverse_Event__c
     WHERE Patient_Age__c = 0
     ORDER BY CreatedDate DESC
     LIMIT 5
 ];
-System.debug(ae);
+
+for (New_Potential_Adverse_Event__c ae : records) {
+    System.debug('Record: ' + ae.Name);
+    System.debug('  DOB: ' + ae.Patient_DOB__c);
+    System.debug('  Age: ' + ae.Patient_Age__c);
+    System.debug('  Age Unit: ' + ae.Patient_Age_Unit__c);
+    System.debug('  Created: ' + ae.CreatedDate);
+    System.debug('------------------------');
+}
+
+if (records.isEmpty()) {
+    System.debug('No records found with Age = 0. Check the object/field API names are correct.');
+}
 
                 // Simulate a fresh form load and inspect what the DOB defaults to
 CCMIC_AE_CreateFormController ctrl;
