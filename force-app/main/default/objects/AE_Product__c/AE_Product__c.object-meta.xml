@@ -1175,6 +1175,10 @@ System.debug('If DOB = today, yearValue would be: ' + yearValue);
 Integer dayValue = testDOB.daysBetween(todayDate);
 System.debug('If DOB = today, dayValue (final fallback) would be: ' + dayValue);
 System.debug('This dayValue of 0 is what gets written to Patient_Age__c — confirming the bug pattern');
+       SELECT Id, CaseId, Case.CaseNumber, Acknowledgement_ID__c, CreatedDate, LastModifiedDate
+FROM New_Potential_Adverse_Event__c
+WHERE CreatedDate = TODAY
+ORDER BY CreatedDate DESC
 
 RecordTypeId,Status,IsVisibleInSelfService,Priority,Description,OwnerId,Product__c,MICC_Address_Line_1__c,MICC_Address_Line_2__c,MICC_City__c,MICC_Closed_on_First_Call__c,MICC_Customer_Title__c,MICC_Customer_Type__c,MICC_Degree__c,MICC_Email_Case__c,MICC_Email__c,MICC_Encrypt__c,MICC_Fax__c,MICC_First_Name__c,MICC_Fulfill__c,MICC_Gender__c,MICC_Inquiry_For__c,MICC_Inquiry_Status__c,MICC_Inquiry_Text__c,MICC_Inquiry_Type__c,MICC_Last_Name__c,MICC_Message_To_Field_Medical__c,MICC_Mobile__c,MICC_Notes__c,MICC_Org_name__c,MICC_Phone__c,MICC_Salutation__c,MICC_Urgent__c,MICC_Source__c,MICC_State__c,MICC_Zip_Code__c,MICC_Phone_Extn__c,MICC_Twitter_Id__c,MICC_Skill_Code__c,MICC_CITY_Restore__c,MICC_EMAIL_Restore__c,NPI_No__c,MICC_Restore_First_Name__c,MICC_Restore_Last_Name__c,MICC_Restore_Email__c,MICC_SALUTION_Restore__c,MICC_Restore_Address_Line_1__c,MICC_Restore_Address_Line_2__c,MICC_Restore_City__c,MICC_Restore_State__c,MICC_Restore_Fax__c,MICC_Restore_Phone__c,MICC_Restore_Zip__c,MICC_Restore_Twitter_Id__c,MICC_Restore_Gender__c
 012A00000019SEaIAM,Open,TRUE,Medium,Product inquiry,005WD00000SC8T9YAL,Arcapta,addnil1,add2nil1,NW,FALSE,Mr.,Consumer,MD,FALSE,tashnim.kausar_ext@novartis.com,FALSE,898989898,NilTest1,FALSE,F,Self,Open,text1,Product Inquiry,lasttest1,HCP requested Field Medical visit.,8989898989,note1,org1,8989898989,Ms.,FALSE,Telephone,UK,67890,911,test1@twitter.com,Telephone,Chennai,test@gmail.com,478909,NilTest1,lasttest1,test@gmail.com,Mr.,addnil1,addnil1,NW,UK,898989898,8989898989,67890,test1@twitter.com,F
