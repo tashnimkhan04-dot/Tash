@@ -1343,6 +1343,118 @@ ORDER BY CreatedDate DESC
     }
 }
 
+            private static void sendSingleAEDataSafely(Id paeId, String token) {
+    String requestBody = '';
+
+    try {
+        requestBody = 
+            '<CreateAEGISIDInput xmlns="http://www.approuter.com/connectors/request/3312/">' +
+            '<PotentialAdverseEventID>' + String.valueOf(paeId) + '</PotentialAdverseEventID>' +
+            '</CreateAEGISIDInput>';
+
+        HttpRequest req = new HttpRequest();
+        req.setEndpoint(BhoomiVeeva_URL);
+        req.setMethod('POST');
+        req.setHeader('Content-Type', 'application/xml');
+        req.setHeader('Accept', 'application/xml');
+        req.setHeader('Authorization', 'Bearer ' + token);
+        req.setTimeout(60000);
+        req.setBody(requestBody);
+
+        Http http = new Http();
+        HttpResponse res = http.send(req);
+
+        Integer statusCode = res.getStatusCode();
+        String responseBody = res.getBody();
+
+        System.debug('AE AEGIS for ' + paeId + ' - Status: ' + statusCode);
+        System.debug('AE AEGIS response for ' + paeId + ': ' + responseBody);
+
+        if (statusCode < 200 || statusCode >= 300) {
+            createOptOutLog(
+                'AE API Call Failed - ' + String.valueOf(paeId),
+                BhoomiVeeva_URL,
+                requestBody,
+                responseBody,
+                statusCode,
+                'Failure'
+            );
+        }
+    } catch (Exception e) {
+        System.debug('AE callout exception for ' + paeId + ': ' + e.getMessage());
+        createOptOutLog(
+            'AE Exception - ' + String.valueOf(paeId),
+            BhoomiVeeva_URL,
+            requestBody,
+            'Exception: ' + e.getMessage(),
+            0,
+            'Failure'
+        );
+    }
+}
+
+            public class AEDataByIdQueueable implements Queueable, Database.AllowsCallouts {
+    private List<Id> allPaeIds;
+    private Integer batchNumber;
+
+    public AEDataByIdQueueable(List<Id> allPaeIds, Integer batchNumber) {
+        this.allPaeIds = allPaeIds;
+        this.batchNumber = batchNumber;
+    }
+
+    public void execute(QueueableContext context) {
+        Integer startIndex = batchNumber * BATCH_SIZE;
+        Integer endIndex = Math.min(startIndex + BATCH_SIZE, allPaeIds.size());
+
+        if (startIndex >= allPaeIds.size()) {
+            System.debug('No more AE records to process.');
+            return;
+        }
+
+        List<Id> currentBatch = new List<Id>();
+        for (Integer i = startIndex; i < endIndex; i++) {
+            currentBatch.add(allPaeIds[i]);
+        }
+
+        System.debug('Processing AE batch ' + (batchNumber + 1));
+        System.debug('Current AE batch size: ' + currentBatch.size());
+        System.debug('Current AE IDs: ' + currentBatch);
+
+        String token = getOAuthToken();
+
+        if (token == null) {
+            System.debug('Failed to get OAuth token for AE batch.');
+            createOptOutLog(
+                'Authentication Failed - AE Batch ' + batchNumber,
+                AUTH_URL,
+                'Failed to obtain OAuth token',
+                null,
+                0,
+                'Failure'
+            );
+            return;
+        }
+
+        List<New_Potential_Adverse_Event__c> paes = [
+            SELECT Id
+            FROM New_Potential_Adverse_Event__c
+            WHERE Id IN :currentBatch
+        ];
+
+        System.debug('AE records found for callout: ' + paes.size());
+
+        for (New_Potential_Adverse_Event__c pae : paes) {
+            sendSingleAEDataSafely(pae.Id, token);
+        }
+
+        if (endIndex < allPaeIds.size()) {
+            System.enqueueJob(new AEDataByIdQueueable(allPaeIds, batchNumber + 1));
+        } else {
+            System.debug('Completed all AE records sent to Boomi. Total: ' + allPaeIds.size());
+        }
+    }
+}
+
 RecordTypeId,Status,IsVisibleInSelfService,Priority,Description,OwnerId,Product__c,MICC_Address_Line_1__c,MICC_Address_Line_2__c,MICC_City__c,MICC_Closed_on_First_Call__c,MICC_Customer_Title__c,MICC_Customer_Type__c,MICC_Degree__c,MICC_Email_Case__c,MICC_Email__c,MICC_Encrypt__c,MICC_Fax__c,MICC_First_Name__c,MICC_Fulfill__c,MICC_Gender__c,MICC_Inquiry_For__c,MICC_Inquiry_Status__c,MICC_Inquiry_Text__c,MICC_Inquiry_Type__c,MICC_Last_Name__c,MICC_Message_To_Field_Medical__c,MICC_Mobile__c,MICC_Notes__c,MICC_Org_name__c,MICC_Phone__c,MICC_Salutation__c,MICC_Urgent__c,MICC_Source__c,MICC_State__c,MICC_Zip_Code__c,MICC_Phone_Extn__c,MICC_Twitter_Id__c,MICC_Skill_Code__c,MICC_CITY_Restore__c,MICC_EMAIL_Restore__c,NPI_No__c,MICC_Restore_First_Name__c,MICC_Restore_Last_Name__c,MICC_Restore_Email__c,MICC_SALUTION_Restore__c,MICC_Restore_Address_Line_1__c,MICC_Restore_Address_Line_2__c,MICC_Restore_City__c,MICC_Restore_State__c,MICC_Restore_Fax__c,MICC_Restore_Phone__c,MICC_Restore_Zip__c,MICC_Restore_Twitter_Id__c,MICC_Restore_Gender__c
 012A00000019SEaIAM,Open,TRUE,Medium,Product inquiry,005WD00000SC8T9YAL,Arcapta,addnil1,add2nil1,NW,FALSE,Mr.,Consumer,MD,FALSE,tashnim.kausar_ext@novartis.com,FALSE,898989898,NilTest1,FALSE,F,Self,Open,text1,Product Inquiry,lasttest1,HCP requested Field Medical visit.,8989898989,note1,org1,8989898989,Ms.,FALSE,Telephone,UK,67890,911,test1@twitter.com,Telephone,Chennai,test@gmail.com,478909,NilTest1,lasttest1,test@gmail.com,Mr.,addnil1,addnil1,NW,UK,898989898,8989898989,67890,test1@twitter.com,F
 012A00000019SEaIAM,Open,TRUE,Medium,Product inquiry,005WD00000SC8T9YAL,Arcapta,addnil2,add2nil2,NW,FALSE,Mr.,Consumer,MD,FALSE,tashnim.kausar_ext@novartis.com,FALSE,898989898,NilTest2,FALSE,F,Self,Open,text2,Product Inquiry,lasttest2,HCP requested Field Medical visit.,8989898989,note2,org2,8989898989,Ms.,FALSE,Telephone,UK,67890,911,test1@twitter.com,Telephone,Chennai,test@gmail.com,89954,NilTest2,lasttest2,test@gmail.com,Mr.,addnil2,addnil2,NW,UK,898989898,8989898989,67890,test1@twitter.com,F
